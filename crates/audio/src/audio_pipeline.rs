@@ -27,7 +27,6 @@ pub const BUFFER_SIZE: usize = // echo canceller and livekit want 10ms of audio
 
 pub fn init(_cx: &mut App) {}
 
-// TODO(jk): this is currently cached only once - we should observe and react instead
 pub fn ensure_devices_initialized(cx: &mut App) {
     if cx.has_global::<AvailableAudioDevices>() {
         return;
@@ -42,6 +41,17 @@ pub fn ensure_devices_initialized(cx: &mut App) {
         cx.refresh();
     })
     .detach();
+}
+
+/// Enumerate the current audio-device topology off the UI thread.
+///
+/// Callers that own a long-lived media session can periodically await this
+/// task, replace [`AvailableAudioDevices`], and recover any selected device
+/// that disappeared while the session was active.
+pub fn refresh_available_devices(
+    executor: &gpui::BackgroundExecutor,
+) -> gpui::Task<Vec<AudioDeviceInfo>> {
+    executor.spawn(async move { get_available_audio_devices() })
 }
 
 #[derive(Default)]

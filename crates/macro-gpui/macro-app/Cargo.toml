@@ -1,0 +1,70 @@
+[package]
+name = "macro_app"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[lib]
+path = "src/macro_app.rs"
+
+[features]
+cargo-clippy = []
+visual-tests = ["gpui/test-support", "gpui_platform/test-support"]
+
+[[bin]]
+name = "macro_visual_test_runner"
+path = "src/visual_test_runner.rs"
+required-features = ["visual-tests"]
+
+[dependencies]
+anyhow.workspace = true
+audio.workspace = true
+assets.workspace = true
+base64.workspace = true
+chrono.workspace = true
+crashes.workspace = true
+editor.workspace = true
+futures.workspace = true
+gpui = { workspace = true, features = ["font-kit"] }
+gpui_platform = { workspace = true, features = ["font-kit"] }
+gpui_tokio.workspace = true
+http_client_tls.workspace = true
+html_to_markdown.workspace = true
+image.workspace = true
+macro_api.workspace = true
+macro_canvas.workspace = true
+macro_entity.workspace = true
+macro_editor.workspace = true
+macro_layout.workspace = true
+macro_list.workspace = true
+macro_metrics.workspace = true
+macro_models.workspace = true
+macro_realtime.workspace = true
+macro_store.workspace = true
+macro_sync.workspace = true
+macro_theme.workspace = true
+macro_ui.workspace = true
+macro_updater.workspace = true
+markdown.workspace = true
+ui.workspace = true
+livekit_client.workspace = true
+paths.workspace = true
+serde = { workspace = true }
+serde_json = { workspace = true }
+semver.workspace = true
+settings.workspace = true
+theme.workspace = true
+theme_settings.workspace = true
+urlencoding.workspace = true
+url.workspace = true
+uuid.workspace = true
+zed_actions.workspace = true
+
+[target.'cfg(target_os = "macos")'.dependencies]
+cocoa.workspace = true
+core-foundation.workspace = true
+core-video.workspace = true
+objc.workspace = true
+
+[dev-dependencies]
+tempfile.workspace = true

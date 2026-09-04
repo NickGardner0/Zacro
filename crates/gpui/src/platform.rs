@@ -1519,6 +1519,36 @@ impl PlatformInputHandler {
             .ok();
     }
 
+    #[cfg(any(test, feature = "test-support"))]
+    pub(crate) fn debug_replace_text_in_range(
+        &mut self,
+        replacement_range: Option<Range<usize>>,
+        text: &str,
+        window: &mut Window,
+        cx: &mut App,
+    ) {
+        self.handler
+            .replace_text_in_range(replacement_range, text, window, cx);
+    }
+
+    #[cfg(any(test, feature = "test-support"))]
+    pub(crate) fn debug_replace_and_mark_text_in_range(
+        &mut self,
+        range_utf16: Option<Range<usize>>,
+        new_text: &str,
+        new_selected_range: Option<Range<usize>>,
+        window: &mut Window,
+        cx: &mut App,
+    ) {
+        self.handler.replace_and_mark_text_in_range(
+            range_utf16,
+            new_text,
+            new_selected_range,
+            window,
+            cx,
+        );
+    }
+
     #[cfg_attr(target_os = "windows", allow(dead_code))]
     pub fn unmark_text(&mut self) {
         self.cx

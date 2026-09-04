@@ -1,0 +1,20 @@
+[package]
+name = "macro_parity"
+version = "0.1.0"
+edition.workspace = true
+license = "AGPL-3.0-only"
+
+[lib]
+path = "src/macro_parity.rs"
+
+[dependencies]
+anyhow.workspace = true
+macro_api.workspace = true
+macro_canvas.workspace = true
+macro_editor.workspace = true
+macro_list.workspace = true
+macro_realtime.workspace = true
+serde_json.workspace = true
+
+[lints]
+workspace = true

@@ -19,6 +19,47 @@ pub use test::{ConnectionState, ParticipantIdentity, RtcStats, SessionStats, Tra
 
 pub struct AudioStream {}
 
+#[cfg(target_os = "macos")]
+pub struct CameraCaptureStream {
+    pub(crate) device_id: String,
+}
+
+#[cfg(target_os = "macos")]
+impl CameraCaptureStream {
+    pub fn device_id(&self) -> &str {
+        &self.device_id
+    }
+}
+
+#[cfg(target_os = "macos")]
+pub struct CameraPreviewView {}
+
+#[cfg(target_os = "macos")]
+impl gpui::Render for CameraPreviewView {
+    fn render(
+        &mut self,
+        _window: &mut gpui::Window,
+        _cx: &mut gpui::Context<Self>,
+    ) -> impl gpui::IntoElement {
+        gpui::Empty
+    }
+}
+
+#[cfg(target_os = "macos")]
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct CameraDevice {
+    pub id: String,
+    pub label: String,
+}
+
+#[cfg(target_os = "macos")]
+pub fn available_camera_devices() -> anyhow::Result<Vec<CameraDevice>> {
+    Ok(vec![CameraDevice {
+        id: "test-camera".into(),
+        label: "Test Camera".into(),
+    }])
+}
+
 impl AudioStream {
     pub fn remote_playback_stats(&self) -> Option<crate::RemoteAudioPlaybackStats> {
         None

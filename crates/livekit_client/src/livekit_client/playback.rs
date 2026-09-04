@@ -754,7 +754,9 @@ fn video_frame_buffer_from_webrtc(buffer: Box<dyn VideoBuffer>) -> Option<Remote
 }
 
 #[cfg(target_os = "macos")]
-fn video_frame_buffer_to_webrtc(frame: ScreenCaptureFrame) -> Option<impl AsRef<dyn VideoBuffer>> {
+pub(crate) fn video_frame_buffer_to_webrtc(
+    frame: ScreenCaptureFrame,
+) -> Option<impl AsRef<dyn VideoBuffer>> {
     use livekit::webrtc;
 
     let pixel_buffer = frame.0.as_concrete_TypeRef();

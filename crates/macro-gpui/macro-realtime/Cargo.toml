@@ -1,0 +1,14 @@
+[package]
+name = "macro_realtime"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[lib]
+path = "src/macro_realtime.rs"
+
+[dependencies]
+macro_api.workspace = true
+macro_models.workspace = true
+serde.workspace = true
+serde_json.workspace = true

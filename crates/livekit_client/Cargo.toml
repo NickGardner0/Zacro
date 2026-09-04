@@ -55,10 +55,13 @@ webrtc-sys.workspace = true
 scap.workspace = true
 
 [target.'cfg(target_os = "macos")'.dependencies]
+block.workspace = true
 cocoa.workspace = true
 core-foundation.workspace = true
 core-video.workspace = true
 coreaudio-rs = "0.12.1"
+dispatch2 = "0.3.1"
+media.workspace = true
 objc.workspace = true
 
 [dev-dependencies]

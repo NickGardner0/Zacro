@@ -1167,6 +1167,7 @@ pub struct Window {
     pub(crate) next_tooltip_id: TooltipId,
     pub(crate) tooltip_bounds: Option<TooltipBounds>,
     pub(crate) next_frame_callbacks: Rc<RefCell<Vec<FrameCallback>>>,
+    pub(crate) next_frame_presented_callbacks: Rc<RefCell<Vec<FrameCallback>>>,
     pub(crate) dirty_views: FxHashSet<EntityId>,
     focus_listeners: SubscriberSet<(), AnyWindowFocusListener>,
     pub(crate) focus_lost_listeners: SubscriberSet<(), AnyObserver>,
@@ -1427,6 +1428,7 @@ impl Window {
         let hovered = Rc::new(Cell::new(platform_window.is_hovered()));
         let needs_present = Rc::new(Cell::new(false));
         let next_frame_callbacks: Rc<RefCell<Vec<FrameCallback>>> = Default::default();
+        let next_frame_presented_callbacks: Rc<RefCell<Vec<FrameCallback>>> = Default::default();
         let input_rate_tracker = Rc::new(RefCell::new(InputRateTracker::default()));
         let last_frame_time = Rc::new(Cell::new(None));
 
@@ -1540,6 +1542,7 @@ impl Window {
             let active = active.clone();
             let needs_present = needs_present.clone();
             let next_frame_callbacks = next_frame_callbacks.clone();
+            let next_frame_presented_callbacks = next_frame_presented_callbacks.clone();
             let input_rate_tracker = input_rate_tracker.clone();
             let mut deferred_force_render = false;
             move |request_frame_options| {
@@ -1580,7 +1583,8 @@ impl Window {
                 // - Inactive window (not focused): cap to ~30fps to save energy
                 let min_frame_interval = if request_frame_options.require_presentation
                     || (!request_frame_options.force_render
-                        && next_frame_callbacks.borrow().is_empty())
+                        && next_frame_callbacks.borrow().is_empty()
+                        && next_frame_presented_callbacks.borrow().is_empty())
                 {
                     None
                 } else if !active.get() && !input_rate_tracker.borrow_mut().is_high_rate() {
@@ -1615,6 +1619,7 @@ impl Window {
                 last_frame_time.set(Some(now));
 
                 let pending_next_frame_callbacks = next_frame_callbacks.take();
+                let pending_next_frame_presented_callbacks = next_frame_presented_callbacks.take();
                 if !pending_next_frame_callbacks.is_empty() {
                     handle
                         .update(&mut cx, |_, window, cx| {
@@ -1630,9 +1635,10 @@ impl Window {
                 // to prevent display underclocking during active input.
                 let needs_present = request_frame_options.require_presentation
                     || needs_present.get()
-                    || input_rate_tracker.borrow_mut().is_high_rate();
+                    || input_rate_tracker.borrow_mut().is_high_rate()
+                    || !pending_next_frame_presented_callbacks.is_empty();
 
-                if invalidator.is_dirty() || force_render {
+                let did_present = if invalidator.is_dirty() || force_render {
                     measure("frame duration", || {
                         handle
                             .update(&mut cx, |_, window, cx| {
@@ -1646,10 +1652,24 @@ impl Window {
                                 arena_clear_needed.clear(cx);
                             })
                             .log_err();
-                    })
+                    });
+                    true
                 } else if needs_present {
                     handle
                         .update(&mut cx, |_, window, _| window.present())
+                        .log_err();
+                    true
+                } else {
+                    false
+                };
+
+                if did_present && !pending_next_frame_presented_callbacks.is_empty() {
+                    handle
+                        .update(&mut cx, |_, window, cx| {
+                            for callback in pending_next_frame_presented_callbacks {
+                                callback(window, cx);
+                            }
+                        })
                         .log_err();
                 }
 
@@ -1657,6 +1677,7 @@ impl Window {
                     .update(&mut cx, |_, window, _| {
                         if window.invalidator.is_dirty()
                             || !window.next_frame_callbacks.borrow().is_empty()
+                            || !window.next_frame_presented_callbacks.borrow().is_empty()
                         {
                             window.platform_window.schedule_frame();
                         }
@@ -1668,7 +1689,10 @@ impl Window {
                 // after this frame (the window was re-invalidated mid-draw, or
                 // animations scheduled next-frame callbacks), re-arm the frame
                 // source explicitly.
-                if invalidator.is_dirty() || !next_frame_callbacks.borrow().is_empty() {
+                if invalidator.is_dirty()
+                    || !next_frame_callbacks.borrow().is_empty()
+                    || !next_frame_presented_callbacks.borrow().is_empty()
+                {
                     invalidator.wake_platform();
                 }
             }
@@ -1860,6 +1884,7 @@ impl Window {
             next_tooltip_id: TooltipId::default(),
             tooltip_bounds: None,
             dirty_views: FxHashSet::default(),
+            next_frame_presented_callbacks,
             focus_listeners: SubscriberSet::new(),
             focus_lost_listeners: SubscriberSet::new(),
             focus_lost_path: SmallVec::new(),
@@ -2347,12 +2372,25 @@ impl Window {
         AsyncWindowContext::new_context(cx.to_async(), self.handle)
     }
 
-    /// Schedule the given closure to be run directly after the current frame is rendered.
+    /// Schedule the given closure to run immediately before the next frame is drawn.
     pub fn on_next_frame(&self, callback: impl FnOnce(&mut Window, &mut App) + 'static) {
         RefCell::borrow_mut(&self.next_frame_callbacks).push(Box::new(callback));
         self.platform_window.schedule_frame();
         // Next-frame callbacks create frame demand without dirtying the
         // window, so the platform's frame source must be woken explicitly.
+        self.invalidator.wake_platform();
+    }
+
+    /// Schedule a closure after the next frame has been drawn and submitted to
+    /// the platform window.
+    ///
+    /// Unlike [`Self::on_next_frame`], which runs immediately before the next
+    /// draw, this callback observes the presentation boundary. It is useful for
+    /// measuring end-to-end input latency and for work that must not run until
+    /// the updated scene has been handed to the compositor.
+    pub fn on_next_frame_presented(&self, callback: impl FnOnce(&mut Window, &mut App) + 'static) {
+        RefCell::borrow_mut(&self.next_frame_presented_callbacks).push(Box::new(callback));
+        self.platform_window.schedule_frame();
         self.invalidator.wake_platform();
     }
 
@@ -2382,6 +2420,41 @@ impl Window {
         let callbacks = self.next_frame_callbacks.take();
         let count = callbacks.len();
         for callback in callbacks {
+            callback(self, cx);
+        }
+        count
+    }
+
+    /// Runs callbacks waiting for a presentation boundary. Test code that
+    /// drives the platform frame loop normally does not need this helper.
+    #[cfg(any(test, feature = "test-support"))]
+    pub fn simulate_next_frame_presented(&mut self, cx: &mut App) -> usize {
+        let callbacks = self.next_frame_presented_callbacks.take();
+        let count = callbacks.len();
+        for callback in callbacks {
+            callback(self, cx);
+        }
+        count
+    }
+
+    /// Drives one complete draw and scene-submission boundary synchronously.
+    ///
+    /// Headless test windows do not own a display-link callback, so interaction
+    /// benchmarks use this to execute the same before-frame callbacks,
+    /// [`Self::draw`], presentation, arena cleanup, and presented callbacks as
+    /// the production frame loop.
+    #[cfg(any(test, feature = "test-support"))]
+    pub fn debug_draw_and_present_frame(&mut self, cx: &mut App) -> usize {
+        let before_draw = self.next_frame_callbacks.take();
+        let after_present = self.next_frame_presented_callbacks.take();
+        for callback in before_draw {
+            callback(self, cx);
+        }
+        let arena_clear_needed = self.draw(cx);
+        self.present();
+        arena_clear_needed.clear(cx);
+        let count = after_present.len();
+        for callback in after_present {
             callback(self, cx);
         }
         count
@@ -3021,7 +3094,8 @@ impl Window {
             present_start,
             Instant::now(),
             self.active.get(),
-            !self.next_frame_callbacks.borrow().is_empty(),
+            !self.next_frame_callbacks.borrow().is_empty()
+                || !self.next_frame_presented_callbacks.borrow().is_empty(),
         );
         self.needs_present.set(false);
         profiling::finish_frame!();
@@ -6123,6 +6197,84 @@ impl Window {
         self.a11y.debug_tree_json()
     }
 
+    /// Returns the painted bounds for an accessibility node in a headless
+    /// test frame. This lets interaction fixtures target the same geometry an
+    /// operating-system accessibility adapter would expose.
+    #[cfg(any(test, feature = "test-support"))]
+    pub fn debug_a11y_node_bounds(&self, node_id: accesskit::NodeId) -> Option<Bounds<Pixels>> {
+        self.a11y.node_bounds.get(&node_id).copied()
+    }
+
+    /// Enables or disables accessibility tree construction for a headless
+    /// test window that has no operating-system accessibility adapter.
+    #[cfg(any(test, feature = "test-support"))]
+    pub fn debug_set_a11y_active(&mut self, active: bool) {
+        self.a11y.set_debug_active(active);
+        self.refresh();
+    }
+
+    /// Sets foreground activity for a headless test window. Real windows get
+    /// this state from their platform callbacks; deterministic interaction
+    /// benchmarks use it to avoid measuring the inactive-window frame cap.
+    #[cfg(any(test, feature = "test-support"))]
+    pub fn debug_set_active(&mut self, active: bool) {
+        self.active.set(active);
+    }
+
+    /// Dispatches an accessibility action through the same action router used
+    /// by the operating-system accessibility adapter.
+    ///
+    /// This is intentionally limited to test-support builds so headless visual
+    /// and interaction tests can verify screen-reader behavior without
+    /// exposing a second production input path.
+    #[cfg(all(any(test, feature = "test-support"), not(target_family = "wasm")))]
+    pub fn debug_perform_a11y_action(&mut self, request: accesskit::ActionRequest, cx: &mut App) {
+        self.handle_a11y_action(request, cx);
+    }
+
+    /// Sends a marked-text update to the currently focused platform input
+    /// handler, matching the callback an IME uses while composition is active.
+    #[cfg(any(test, feature = "test-support"))]
+    pub fn debug_replace_and_mark_text_in_range(
+        &mut self,
+        range_utf16: Option<Range<usize>>,
+        new_text: &str,
+        new_selected_range: Option<Range<usize>>,
+        cx: &mut App,
+    ) -> bool {
+        let Some(mut input_handler) = self.platform_window.take_input_handler() else {
+            return false;
+        };
+        input_handler.debug_replace_and_mark_text_in_range(
+            range_utf16,
+            new_text,
+            new_selected_range,
+            self,
+            cx,
+        );
+        self.platform_window.set_input_handler(input_handler);
+        self.refresh();
+        true
+    }
+
+    /// Commits text through the currently focused platform input handler,
+    /// matching the final callback from an IME composition session.
+    #[cfg(any(test, feature = "test-support"))]
+    pub fn debug_replace_text_in_range(
+        &mut self,
+        replacement_range: Option<Range<usize>>,
+        text: &str,
+        cx: &mut App,
+    ) -> bool {
+        let Some(mut input_handler) = self.platform_window.take_input_handler() else {
+            return false;
+        };
+        input_handler.debug_replace_text_in_range(replacement_range, text, self, cx);
+        self.platform_window.set_input_handler(input_handler);
+        self.refresh();
+        true
+    }
+
     /// Register a listener for an accessibility action on a specific node.
     /// The listener will be called when a screen reader requests the given
     /// action on the node identified by `node_id`.
@@ -7159,6 +7311,28 @@ mod tests {
         );
         assert!(test_window.simulate_scheduled_frame());
         assert!(!test_window.frame_scheduled());
+    }
+
+    #[gpui::test]
+    fn presented_frame_callback_runs_at_the_submission_boundary(cx: &mut TestAppContext) {
+        let window = cx.add_window(|_, _| Empty);
+        let test_window = cx.test_window(window.into());
+        let callback_ran = Rc::new(Cell::new(false));
+
+        while test_window.simulate_scheduled_frame() {}
+        cx.update_window(window.into(), {
+            let callback_ran = callback_ran.clone();
+            move |_, window, cx| {
+                window.active.set(true);
+                cx.notify(window.root.as_ref().unwrap().entity_id());
+                window.on_next_frame_presented(move |_, _| callback_ran.set(true));
+            }
+        })
+        .unwrap();
+
+        assert!(!callback_ran.get());
+        assert!(test_window.simulate_scheduled_frame());
+        assert!(callback_ran.get());
     }
 
     #[gpui::test]

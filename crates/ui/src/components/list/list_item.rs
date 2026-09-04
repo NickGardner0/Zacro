@@ -64,6 +64,7 @@ pub struct ListItem {
     aria_keyshortcuts: Option<SharedString>,
     aria_checked: Option<bool>,
     aria_active_descendant: bool,
+    tab_index: Option<isize>,
 }
 
 impl ListItem {
@@ -100,6 +101,7 @@ impl ListItem {
             aria_keyshortcuts: None,
             aria_checked: None,
             aria_active_descendant: false,
+            tab_index: None,
         }
     }
 
@@ -146,6 +148,13 @@ impl ListItem {
     /// the selected item. See [`StatefulInteractiveElement::aria_active_descendant`].
     pub fn aria_active_descendant(mut self) -> Self {
         self.aria_active_descendant = true;
+        self
+    }
+
+    /// Makes this list item reachable in the surrounding keyboard tab order.
+    /// Composite lists that manage focus on a parent should leave this unset.
+    pub fn tab_index(mut self, tab_index: isize) -> Self {
+        self.tab_index = Some(tab_index);
         self
     }
 
@@ -342,6 +351,7 @@ impl RenderOnce for ListItem {
                         |this| this.aria_active_descendant(),
                     )
                     .when_some(self.aria_label, |this, label| this.aria_label(label))
+                    .when_some(self.tab_index, |this, tab_index| this.tab_index(tab_index))
                     .when_some(self.aria_keyshortcuts, |this, keyshortcuts| {
                         this.aria_keyshortcuts(keyshortcuts)
                     })

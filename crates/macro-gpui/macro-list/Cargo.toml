@@ -1,0 +1,17 @@
+[package]
+name = "macro_list"
+version = "0.1.0"
+edition.workspace = true
+license = "AGPL-3.0-only"
+
+[lib]
+path = "src/macro_list.rs"
+
+[dependencies]
+chrono.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+urlencoding.workspace = true
+
+[lints]
+workspace = true

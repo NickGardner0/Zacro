@@ -1,0 +1,1887 @@
+{
+  "schema_version": 2,
+  "macro_revision": "7324c6adaee90070e64bcabf3c0d77600c96db71",
+  "zed_revision": "f66ed399cdde86092af8af3dc7b418abf45f37f8",
+  "sources": {
+    "routes": [
+      "*404",
+      "/",
+      "/activity",
+      "/agents",
+      "/calls",
+      "/channel-invite",
+      "/channels",
+      "/companies",
+      "/documents",
+      "/files",
+      "/inbox",
+      "/login",
+      "/login/popup/success",
+      "/mail",
+      "/mobile-email-signup",
+      "/onboarding",
+      "/recent",
+      "/reminders",
+      "/setup",
+      "/signup",
+      "/task-slug/:taskSlug",
+      "/tasks",
+      "/team-invite",
+      "/welcome"
+    ],
+    "feature_directories": [
+      "activity",
+      "auth",
+      "block-agent",
+      "block-automation",
+      "block-calendar",
+      "block-call",
+      "block-canvas",
+      "block-channel",
+      "block-chat",
+      "block-code",
+      "block-company",
+      "block-contact",
+      "block-email",
+      "block-image",
+      "block-md",
+      "block-pdf",
+      "block-pr",
+      "block-project",
+      "block-unknown",
+      "block-video",
+      "calendar",
+      "channel",
+      "channel-invitations",
+      "chat",
+      "command",
+      "companies",
+      "contacts",
+      "devtools",
+      "dynamic-ui",
+      "entity",
+      "favorites",
+      "getting-started",
+      "home",
+      "inbox",
+      "integrations",
+      "next-soup",
+      "notifications",
+      "onboarding",
+      "paywall",
+      "property",
+      "reminders",
+      "settings",
+      "setup",
+      "sharing",
+      "team-invitations",
+      "theme"
+    ],
+    "generated_sdk_files": [
+      "packages/sdk/generated/agent-harness/client.gen.ts",
+      "packages/sdk/generated/agent-harness/client/client.gen.ts",
+      "packages/sdk/generated/agent-harness/client/index.ts",
+      "packages/sdk/generated/agent-harness/client/types.gen.ts",
+      "packages/sdk/generated/agent-harness/client/utils.gen.ts",
+      "packages/sdk/generated/agent-harness/core/auth.gen.ts",
+      "packages/sdk/generated/agent-harness/core/bodySerializer.gen.ts",
+      "packages/sdk/generated/agent-harness/core/params.gen.ts",
+      "packages/sdk/generated/agent-harness/core/pathSerializer.gen.ts",
+      "packages/sdk/generated/agent-harness/core/queryKeySerializer.gen.ts",
+      "packages/sdk/generated/agent-harness/core/serverSentEvents.gen.ts",
+      "packages/sdk/generated/agent-harness/core/types.gen.ts",
+      "packages/sdk/generated/agent-harness/core/utils.gen.ts",
+      "packages/sdk/generated/agent-harness/index.ts",
+      "packages/sdk/generated/agent-harness/sdk.gen.ts",
+      "packages/sdk/generated/agent-harness/types.gen.ts",
+      "packages/sdk/generated/auth/client.gen.ts",
+      "packages/sdk/generated/auth/client/client.gen.ts",
+      "packages/sdk/generated/auth/client/index.ts",
+      "packages/sdk/generated/auth/client/types.gen.ts",
+      "packages/sdk/generated/auth/client/utils.gen.ts",
+      "packages/sdk/generated/auth/core/auth.gen.ts",
+      "packages/sdk/generated/auth/core/bodySerializer.gen.ts",
+      "packages/sdk/generated/auth/core/params.gen.ts",
+      "packages/sdk/generated/auth/core/pathSerializer.gen.ts",
+      "packages/sdk/generated/auth/core/queryKeySerializer.gen.ts",
+      "packages/sdk/generated/auth/core/serverSentEvents.gen.ts",
+      "packages/sdk/generated/auth/core/types.gen.ts",
+      "packages/sdk/generated/auth/core/utils.gen.ts",
+      "packages/sdk/generated/auth/index.ts",
+      "packages/sdk/generated/auth/sdk.gen.ts",
+      "packages/sdk/generated/auth/types.gen.ts",
+      "packages/sdk/generated/cognition/client.gen.ts",
+      "packages/sdk/generated/cognition/client/client.gen.ts",
+      "packages/sdk/generated/cognition/client/index.ts",
+      "packages/sdk/generated/cognition/client/types.gen.ts",
+      "packages/sdk/generated/cognition/client/utils.gen.ts",
+      "packages/sdk/generated/cognition/core/auth.gen.ts",
+      "packages/sdk/generated/cognition/core/bodySerializer.gen.ts",
+      "packages/sdk/generated/cognition/core/params.gen.ts",
+      "packages/sdk/generated/cognition/core/pathSerializer.gen.ts",
+      "packages/sdk/generated/cognition/core/queryKeySerializer.gen.ts",
+      "packages/sdk/generated/cognition/core/serverSentEvents.gen.ts",
+      "packages/sdk/generated/cognition/core/types.gen.ts",
+      "packages/sdk/generated/cognition/core/utils.gen.ts",
+      "packages/sdk/generated/cognition/index.ts",
+      "packages/sdk/generated/cognition/sdk.gen.ts",
+      "packages/sdk/generated/cognition/types.gen.ts",
+      "packages/sdk/generated/connection/client.gen.ts",
+      "packages/sdk/generated/connection/client/client.gen.ts",
+      "packages/sdk/generated/connection/client/index.ts",
+      "packages/sdk/generated/connection/client/types.gen.ts",
+      "packages/sdk/generated/connection/client/utils.gen.ts",
+      "packages/sdk/generated/connection/core/auth.gen.ts",
+      "packages/sdk/generated/connection/core/bodySerializer.gen.ts",
+      "packages/sdk/generated/connection/core/params.gen.ts",
+      "packages/sdk/generated/connection/core/pathSerializer.gen.ts",
+      "packages/sdk/generated/connection/core/queryKeySerializer.gen.ts",
+      "packages/sdk/generated/connection/core/serverSentEvents.gen.ts",
+      "packages/sdk/generated/connection/core/types.gen.ts",
+      "packages/sdk/generated/connection/core/utils.gen.ts",
+      "packages/sdk/generated/connection/index.ts",
+      "packages/sdk/generated/connection/sdk.gen.ts",
+      "packages/sdk/generated/connection/types.gen.ts",
+      "packages/sdk/generated/contacts/client.gen.ts",
+      "packages/sdk/generated/contacts/client/client.gen.ts",
+      "packages/sdk/generated/contacts/client/index.ts",
+      "packages/sdk/generated/contacts/client/types.gen.ts",
+      "packages/sdk/generated/contacts/client/utils.gen.ts",
+      "packages/sdk/generated/contacts/core/auth.gen.ts",
+      "packages/sdk/generated/contacts/core/bodySerializer.gen.ts",
+      "packages/sdk/generated/contacts/core/params.gen.ts",
+      "packages/sdk/generated/contacts/core/pathSerializer.gen.ts",
+      "packages/sdk/generated/contacts/core/queryKeySerializer.gen.ts",
+      "packages/sdk/generated/contacts/core/serverSentEvents.gen.ts",
+      "packages/sdk/generated/contacts/core/types.gen.ts",
+      "packages/sdk/generated/contacts/core/utils.gen.ts",
+      "packages/sdk/generated/contacts/index.ts",
+      "packages/sdk/generated/contacts/sdk.gen.ts",
+      "packages/sdk/generated/contacts/types.gen.ts",
+      "packages/sdk/generated/email/client.gen.ts",
+      "packages/sdk/generated/email/client/client.gen.ts",
+      "packages/sdk/generated/email/client/index.ts",
+      "packages/sdk/generated/email/client/types.gen.ts",
+      "packages/sdk/generated/email/client/utils.gen.ts",
+      "packages/sdk/generated/email/core/auth.gen.ts",
+      "packages/sdk/generated/email/core/bodySerializer.gen.ts",
+      "packages/sdk/generated/email/core/params.gen.ts",
+      "packages/sdk/generated/email/core/pathSerializer.gen.ts",
+      "packages/sdk/generated/email/core/queryKeySerializer.gen.ts",
+      "packages/sdk/generated/email/core/serverSentEvents.gen.ts",
+      "packages/sdk/generated/email/core/types.gen.ts",
+      "packages/sdk/generated/email/core/utils.gen.ts",
+      "packages/sdk/generated/email/index.ts",
+      "packages/sdk/generated/email/sdk.gen.ts",
+      "packages/sdk/generated/email/types.gen.ts",
+      "packages/sdk/generated/notification/client.gen.ts",
+      "packages/sdk/generated/notification/client/client.gen.ts",
+      "packages/sdk/generated/notification/client/index.ts",
+      "packages/sdk/generated/notification/client/types.gen.ts",
+      "packages/sdk/generated/notification/client/utils.gen.ts",
+      "packages/sdk/generated/notification/core/auth.gen.ts",
+      "packages/sdk/generated/notification/core/bodySerializer.gen.ts",
+      "packages/sdk/generated/notification/core/params.gen.ts",
+      "packages/sdk/generated/notification/core/pathSerializer.gen.ts",
+      "packages/sdk/generated/notification/core/queryKeySerializer.gen.ts",
+      "packages/sdk/generated/notification/core/serverSentEvents.gen.ts",
+      "packages/sdk/generated/notification/core/types.gen.ts",
+      "packages/sdk/generated/notification/core/utils.gen.ts",
+      "packages/sdk/generated/notification/index.ts",
+      "packages/sdk/generated/notification/sdk.gen.ts",
+      "packages/sdk/generated/notification/types.gen.ts",
+      "packages/sdk/generated/properties/client.gen.ts",
+      "packages/sdk/generated/properties/client/client.gen.ts",
+      "packages/sdk/generated/properties/client/index.ts",
+      "packages/sdk/generated/properties/client/types.gen.ts",
+      "packages/sdk/generated/properties/client/utils.gen.ts",
+      "packages/sdk/generated/properties/core/auth.gen.ts",
+      "packages/sdk/generated/properties/core/bodySerializer.gen.ts",
+      "packages/sdk/generated/properties/core/params.gen.ts",
+      "packages/sdk/generated/properties/core/pathSerializer.gen.ts",
+      "packages/sdk/generated/properties/core/queryKeySerializer.gen.ts",
+      "packages/sdk/generated/properties/core/serverSentEvents.gen.ts",
+      "packages/sdk/generated/properties/core/types.gen.ts",
+      "packages/sdk/generated/properties/core/utils.gen.ts",
+      "packages/sdk/generated/properties/index.ts",
+      "packages/sdk/generated/properties/sdk.gen.ts",
+      "packages/sdk/generated/properties/types.gen.ts",
+      "packages/sdk/generated/scheduled-action/client.gen.ts",
+      "packages/sdk/generated/scheduled-action/client/client.gen.ts",
+      "packages/sdk/generated/scheduled-action/client/index.ts",
+      "packages/sdk/generated/scheduled-action/client/types.gen.ts",
+      "packages/sdk/generated/scheduled-action/client/utils.gen.ts",
+      "packages/sdk/generated/scheduled-action/core/auth.gen.ts",
+      "packages/sdk/generated/scheduled-action/core/bodySerializer.gen.ts",
+      "packages/sdk/generated/scheduled-action/core/params.gen.ts",
+      "packages/sdk/generated/scheduled-action/core/pathSerializer.gen.ts",
+      "packages/sdk/generated/scheduled-action/core/queryKeySerializer.gen.ts",
+      "packages/sdk/generated/scheduled-action/core/serverSentEvents.gen.ts",
+      "packages/sdk/generated/scheduled-action/core/types.gen.ts",
+      "packages/sdk/generated/scheduled-action/core/utils.gen.ts",
+      "packages/sdk/generated/scheduled-action/index.ts",
+      "packages/sdk/generated/scheduled-action/sdk.gen.ts",
+      "packages/sdk/generated/scheduled-action/types.gen.ts",
+      "packages/sdk/generated/search/client.gen.ts",
+      "packages/sdk/generated/search/client/client.gen.ts",
+      "packages/sdk/generated/search/client/index.ts",
+      "packages/sdk/generated/search/client/types.gen.ts",
+      "packages/sdk/generated/search/client/utils.gen.ts",
+      "packages/sdk/generated/search/core/auth.gen.ts",
+      "packages/sdk/generated/search/core/bodySerializer.gen.ts",
+      "packages/sdk/generated/search/core/params.gen.ts",
+      "packages/sdk/generated/search/core/pathSerializer.gen.ts",
+      "packages/sdk/generated/search/core/queryKeySerializer.gen.ts",
+      "packages/sdk/generated/search/core/serverSentEvents.gen.ts",
+      "packages/sdk/generated/search/core/types.gen.ts",
+      "packages/sdk/generated/search/core/utils.gen.ts",
+      "packages/sdk/generated/search/index.ts",
+      "packages/sdk/generated/search/sdk.gen.ts",
+      "packages/sdk/generated/search/types.gen.ts",
+      "packages/sdk/generated/static-files/client.gen.ts",
+      "packages/sdk/generated/static-files/client/client.gen.ts",
+      "packages/sdk/generated/static-files/client/index.ts",
+      "packages/sdk/generated/static-files/client/types.gen.ts",
+      "packages/sdk/generated/static-files/client/utils.gen.ts",
+      "packages/sdk/generated/static-files/core/auth.gen.ts",
+      "packages/sdk/generated/static-files/core/bodySerializer.gen.ts",
+      "packages/sdk/generated/static-files/core/params.gen.ts",
+      "packages/sdk/generated/static-files/core/pathSerializer.gen.ts",
+      "packages/sdk/generated/static-files/core/queryKeySerializer.gen.ts",
+      "packages/sdk/generated/static-files/core/serverSentEvents.gen.ts",
+      "packages/sdk/generated/static-files/core/types.gen.ts",
+      "packages/sdk/generated/static-files/core/utils.gen.ts",
+      "packages/sdk/generated/static-files/index.ts",
+      "packages/sdk/generated/static-files/sdk.gen.ts",
+      "packages/sdk/generated/static-files/types.gen.ts",
+      "packages/sdk/generated/storage/client.gen.ts",
+      "packages/sdk/generated/storage/client/client.gen.ts",
+      "packages/sdk/generated/storage/client/index.ts",
+      "packages/sdk/generated/storage/client/types.gen.ts",
+      "packages/sdk/generated/storage/client/utils.gen.ts",
+      "packages/sdk/generated/storage/core/auth.gen.ts",
+      "packages/sdk/generated/storage/core/bodySerializer.gen.ts",
+      "packages/sdk/generated/storage/core/params.gen.ts",
+      "packages/sdk/generated/storage/core/pathSerializer.gen.ts",
+      "packages/sdk/generated/storage/core/queryKeySerializer.gen.ts",
+      "packages/sdk/generated/storage/core/serverSentEvents.gen.ts",
+      "packages/sdk/generated/storage/core/types.gen.ts",
+      "packages/sdk/generated/storage/core/utils.gen.ts",
+      "packages/sdk/generated/storage/index.ts",
+      "packages/sdk/generated/storage/sdk.gen.ts",
+      "packages/sdk/generated/storage/types.gen.ts",
+      "packages/sdk/generated/unfurl/client.gen.ts",
+      "packages/sdk/generated/unfurl/client/client.gen.ts",
+      "packages/sdk/generated/unfurl/client/index.ts",
+      "packages/sdk/generated/unfurl/client/types.gen.ts",
+      "packages/sdk/generated/unfurl/client/utils.gen.ts",
+      "packages/sdk/generated/unfurl/core/auth.gen.ts",
+      "packages/sdk/generated/unfurl/core/bodySerializer.gen.ts",
+      "packages/sdk/generated/unfurl/core/params.gen.ts",
+      "packages/sdk/generated/unfurl/core/pathSerializer.gen.ts",
+      "packages/sdk/generated/unfurl/core/queryKeySerializer.gen.ts",
+      "packages/sdk/generated/unfurl/core/serverSentEvents.gen.ts",
+      "packages/sdk/generated/unfurl/core/types.gen.ts",
+      "packages/sdk/generated/unfurl/core/utils.gen.ts",
+      "packages/sdk/generated/unfurl/index.ts",
+      "packages/sdk/generated/unfurl/sdk.gen.ts",
+      "packages/sdk/generated/unfurl/types.gen.ts"
+    ],
+    "generated_sdk_methods": {
+      "agent-harness": [
+        "controlAgentSession",
+        "createAgentSession",
+        "deleteAgentSession",
+        "getAgentSandboxSize",
+        "getAgentSession",
+        "getAgentSessionLog",
+        "putAgentSandboxSize",
+        "putAgentSessionSandboxSize",
+        "renameAgentSession"
+      ],
+      "auth": [
+        "appleLogin",
+        "checkGithubLinkStatus",
+        "checkGmailLinkStatus",
+        "createCheckoutSessionV2",
+        "createInProgressLink",
+        "createMergeRequest",
+        "createPortalSession",
+        "createTeam",
+        "createUser",
+        "deleteCursorApiKey",
+        "deleteGithubLink",
+        "deleteTeam",
+        "deleteTeamInviteHandler",
+        "deleteUser",
+        "enrichGithubPullRequests",
+        "generateEmailLink",
+        "getCursorApiKey",
+        "getLegacyUserPermissions",
+        "getPermissions",
+        "getReferralCode",
+        "getTeam",
+        "getTeamInvites",
+        "getUserInfo",
+        "getUserInvites",
+        "getUserLinkExists",
+        "getUserName",
+        "getUserNames",
+        "getUserNamesWithEmail",
+        "getUserOrganization",
+        "getUserPermissions",
+        "getUserQuota",
+        "getUserTeams",
+        "healthHandler",
+        "initGithubLink",
+        "initGmailLink",
+        "initOutlookLink",
+        "inviteToTeam",
+        "joinTeam",
+        "listCursorModels",
+        "logout",
+        "macroApiToken",
+        "oauth2Callback",
+        "oauthRedirect",
+        "passwordLogin",
+        "passwordlessCallback",
+        "passwordlessLogin",
+        "patchTeam",
+        "patchTeamCrmSettings",
+        "patchUserGroup",
+        "patchUserOnboarding",
+        "patchUserTutorial",
+        "postProfilePictures",
+        "putCursorApiKey",
+        "putCursorDefaultModel",
+        "putProfilePicture",
+        "putUserName",
+        "refresh",
+        "rejectInvitation",
+        "removeUserFromTeam",
+        "resendFusionauthVerifyUserEmail",
+        "sendMobileWelcomeEmail",
+        "sendReferralCode",
+        "sessionCreation",
+        "sessionLogin",
+        "ssoLogin",
+        "toggleTeamAutoJoinDomain",
+        "toggleTeamNonAdminInvites",
+        "verifyEmailLink",
+        "verifyFusionauthUserEmail",
+        "verifyMergeRequest"
+      ],
+      "cognition": [
+        "addMcpServer",
+        "browsePipedreamMcpCatalog",
+        "callTool",
+        "completeHandler",
+        "completePipedreamMcpConnection",
+        "copyChat",
+        "createChat",
+        "createPipedreamMcpToken",
+        "deleteChat",
+        "deleteMcpServer",
+        "deletePipedreamMcpConnection",
+        "dismissRunHandler",
+        "getBatchPreview",
+        "getChat",
+        "getChatHistoryBatchMessagesHandler",
+        "getChatHistoryHandler",
+        "getChatPermissions",
+        "getChatsForAttachmentHandler",
+        "getCitationHandler",
+        "getMemoryHandler",
+        "getStateHandler",
+        "getStateHandler2",
+        "getUsageHandler",
+        "healthHandler",
+        "listMcpServers",
+        "listPipedreamMcpConnections",
+        "mcpAuthCallback",
+        "mcpOauthClientMetadata",
+        "patchChat",
+        "permanentlyDeleteChat",
+        "rejectToolCall",
+        "retryGatherHandler",
+        "revertDeleteChat",
+        "runImportHandler",
+        "sendChatMessage",
+        "setPricingHandler",
+        "startMcpAuth",
+        "stopChatStream",
+        "structuredCompletion",
+        "updateMcpServer",
+        "updatePipedreamMcpConnection",
+        "updateToolCall",
+        "updateToolResponse",
+        "upsertAiProjection"
+      ],
+      "connection": [
+        "batchSendMessageHandler",
+        "getEntityHandler",
+        "sendMessageHandler"
+      ],
+      "contacts": [
+        "addContact",
+        "getContacts"
+      ],
+      "email": [
+        "addDraftAttachment",
+        "addForwardedAttachment",
+        "addRemoveLabel",
+        "addRemoveThreadLabel",
+        "archiveThread",
+        "blockSender",
+        "cancelBackfillGmail",
+        "createCalendarEvent",
+        "createDraft",
+        "createLabel",
+        "deleteCalendarEvent",
+        "deleteDraft",
+        "deleteEmailFilter",
+        "deleteLabel",
+        "deleteLink",
+        "deleteScheduledDraft",
+        "disableLinkCalendar",
+        "disableSync",
+        "getAttachment",
+        "getAttachmentDocumentId",
+        "getBackfillGmail",
+        "getBackfillGmailActive",
+        "getMessage",
+        "getMessagesBatch",
+        "getScheduledMessages",
+        "getThread",
+        "getThreadMessagesHandler",
+        "healthCheckLinks",
+        "healthHandler",
+        "initUser",
+        "listBackfillGmail",
+        "listBlockedSenders",
+        "listCalendars",
+        "listContacts",
+        "listEmailFilters",
+        "listLabels",
+        "listLinks",
+        "patchSettings",
+        "previewsInboxCursor",
+        "removeDraftAttachment",
+        "removeForwardedAttachment",
+        "resyncLink",
+        "rsvpCalendarEvent",
+        "sendMessage",
+        "threadSeen",
+        "unblockSender",
+        "updateCalendarEvent",
+        "updateThreadProject",
+        "upsertEmailFilter",
+        "upsertScheduledMessage"
+      ],
+      "notification": [
+        "bulkDeleteUserNotificationsV2",
+        "bulkGetTypedNotificationsByEventItemIds",
+        "bulkMarkNotificationsDone",
+        "bulkMarkNotificationsSeen",
+        "bulkMarkNotificationsUndone",
+        "deleteUserNotificationV2",
+        "disableNotificationType",
+        "enableNotificationType",
+        "getNotificationTypePreferences",
+        "getTypedNotificationById",
+        "getTypedNotificationsByEventItemId",
+        "getUnsubscribes",
+        "healthHandler",
+        "listTypedNotifications",
+        "removeUnsubscribeAll",
+        "removeUnsubscribeItem",
+        "unsubscribeAll",
+        "unsubscribeEmail",
+        "unsubscribeItem"
+      ],
+      "properties": [
+        "addEntityPropertyOption",
+        "addPropertyOption",
+        "bulkUpdateEntitiesPropertyOptions",
+        "bulkUpdateEntityPropertyOptions",
+        "createPropertyDefinition",
+        "deleteEntityProperty",
+        "deletePropertyDefinition",
+        "deletePropertyOption",
+        "ensureTagSet",
+        "getBulkEntityProperties",
+        "getEntityProperties",
+        "getPropertyDefinition",
+        "getPropertyOptions",
+        "listProperties",
+        "listTags",
+        "mergeTag",
+        "promoteTag",
+        "removeEntityPropertyOption",
+        "setEntityProperty",
+        "updatePropertyOption"
+      ],
+      "scheduled-action": [
+        "createScheduledAction",
+        "deleteScheduledAction",
+        "executeScheduledActionNow",
+        "listScheduledActionHistory",
+        "listScheduledActions",
+        "scheduledActionHealth",
+        "updateScheduledAction"
+      ],
+      "search": [
+        "simpleUnifiedSearch",
+        "unifiedSearch"
+      ],
+      "static-files": [
+        "getFileDocumentation",
+        "handleBulkDeleteFile",
+        "handleDeleteFile",
+        "handleGetMetadata",
+        "putPresignedUrl"
+      ],
+      "storage": [
+        "addFavorite",
+        "addParticipants",
+        "addPinHandler",
+        "bulkWakeupSyncServiceDocuments",
+        "callWebhook",
+        "checkActiveCall",
+        "copyDocument",
+        "createAnchor",
+        "createChannel",
+        "createChannelScopedBot",
+        "createCollabSurfaceToken",
+        "createComment",
+        "createCrmComment",
+        "createCrmCompany",
+        "createCrmContact",
+        "createDocument",
+        "createEntityMention",
+        "createInstructionsHandler",
+        "createMarkdownHandler",
+        "createProjectHandler",
+        "createReminder",
+        "createSkillHandler",
+        "createSnippetHandler",
+        "createTaskHandler",
+        "createViewHandler",
+        "createWebhook",
+        "deleteAnchor",
+        "deleteCallRecord",
+        "deleteChannel",
+        "deleteCollabSurface",
+        "deleteComment",
+        "deleteCrmComment",
+        "deleteDocument",
+        "deleteEntityMention",
+        "deleteHistoryHandler",
+        "deleteMessage",
+        "deleteProjectHandler",
+        "deleteReminder",
+        "deleteUserDocumentViewLocation",
+        "deleteViewHandler",
+        "deleteWebhook",
+        "editAnchor",
+        "editCallRecord",
+        "editCallTranscript",
+        "editComment",
+        "editCrmComment",
+        "editDocument",
+        "editProjectV2",
+        "editThreadV2",
+        "ensureCollabSurface",
+        "excludeDefaultViewHandler",
+        "exportDocument",
+        "getActiveCalls",
+        "getActivity",
+        "getAttachmentReferences",
+        "getBatchCallRecordPreview",
+        "getBatchChannelPreview",
+        "getBatchPreviewHandler",
+        "getBatchProjectPreview",
+        "getCallRecord",
+        "getChannel",
+        "getChannelAttachments",
+        "getChannelJoinLink",
+        "getChannelMessages",
+        "getChannelParticipants",
+        "getChannels",
+        "getCollabSurface",
+        "getCompany",
+        "getContact",
+        "getContactByEmail",
+        "getCrmTeamSettings",
+        "getDocument",
+        "getDocumentAnchors",
+        "getDocumentBranchName",
+        "getDocumentByTeamSlug",
+        "getDocumentComments",
+        "getDocumentGithubPullRequests",
+        "getDocumentListHandler",
+        "getDocumentLocationV3",
+        "getDocumentPermissionsToken",
+        "getDocumentPermissionsV2",
+        "getDocumentProcessingResult",
+        "getDocumentShortId",
+        "getDocumentTeamShare",
+        "getDocumentVersion",
+        "getDocumentViewsHandler",
+        "getEntityPermission",
+        "getForeignEntity",
+        "getHistoryHandler",
+        "getInstructionsHandler",
+        "getItemsSoup",
+        "getLocationHandler",
+        "getMessageWithContext",
+        "getOrCreateCall",
+        "getOrCreateDm",
+        "getOrCreatePrivate",
+        "getPendingProjectsHandler",
+        "getPinsHandler",
+        "getProjectContentHandler",
+        "getProjectHandler",
+        "getProjectPermissionsV2",
+        "getProjectUserAccessLevel",
+        "getProjectsHandler",
+        "getReminder",
+        "getRingStatus",
+        "getSelfBot",
+        "getSystemSkillsHandler",
+        "getThreadReplies",
+        "getUserDocumentViewLocation",
+        "getUserDocumentsHandler",
+        "getViewsHandler",
+        "getWebhook",
+        "handler",
+        "healthHandler",
+        "ingestTranscript",
+        "initializeUserDocuments",
+        "installSync",
+        "jobProcessingResultHandler",
+        "joinChannel",
+        "joinChannelByCode",
+        "leaveChannel",
+        "leaveOrEndCall",
+        "listBotChannels",
+        "listCompanyContacts",
+        "listCrmComments",
+        "listFavorites",
+        "listOccurrences",
+        "listReminders",
+        "listWebhooks",
+        "mentionPreviews",
+        "patchChannel",
+        "patchMessage",
+        "patchViewHandler",
+        "patchWebhook",
+        "permanentlyDeleteDocument",
+        "permanentlyDeleteProject",
+        "postActivity",
+        "postChannelBotWebhook",
+        "postChannelMessages",
+        "postItemsSoup",
+        "postItemsSoupAst",
+        "postItemsSoupAstGrouped",
+        "postMessage",
+        "postReaction",
+        "postTyping",
+        "presaveDocumentHandler",
+        "putCrmTeamSettings",
+        "recentlyDeleted",
+        "removeBotFromChannelByBot",
+        "removeFavoriteByEntity",
+        "removeParticipants",
+        "removePinHandler",
+        "reorderFavorites",
+        "reorderPinsHandler",
+        "resolveChannelMessage",
+        "revertDeleteDocument",
+        "revertDeleteProject",
+        "saveDocumentHandler",
+        "setCompanyHidden",
+        "setContactHidden",
+        "setCrmCompanyName",
+        "setCrmContactName",
+        "setDocumentTeamShare",
+        "setEmailSync",
+        "simpleSave",
+        "toggleShareWithTeam",
+        "updateReminder",
+        "uploadExtractFolderHandler",
+        "uploadFolderHandler",
+        "upsertHistoryHandler",
+        "upsertUserDocumentViewLocation",
+        "validateDocumentPermissionsToken",
+        "validateWebhook"
+      ],
+      "unfurl": [
+        "getUnfurl",
+        "getUnfurlBulk",
+        "proxyRequestHandler"
+      ]
+    },
+    "command_registrations": [
+      {
+        "token": "block.focus",
+        "locations": [
+          "apps/web/src/features/block-chat/component/Chat.tsx:291",
+          "apps/web/src/features/block-email/component/Email.tsx:555",
+          "apps/web/src/features/block-md/component/Notebook.tsx:226",
+          "apps/web/src/features/home/home.tsx:213"
+        ]
+      },
+      {
+        "token": "block.share",
+        "locations": [
+          "apps/web/src/lib/core/component/TopBar/ShareButton.tsx:1192"
+        ]
+      },
+      {
+        "token": "block.toggleSidePanel",
+        "locations": [
+          "apps/web/src/features/block-agent/component/sidepanel/AgentSidePanelSections.tsx:78",
+          "apps/web/src/features/block-email/component/TopBar.tsx:70",
+          "apps/web/src/features/block-md/component/TopBar.tsx:123"
+        ]
+      },
+      {
+        "token": "calendar.period.next",
+        "locations": [
+          "apps/web/src/features/calendar/hooks/use-calendar-hotkeys.ts:78"
+        ]
+      },
+      {
+        "token": "calendar.period.previous",
+        "locations": [
+          "apps/web/src/features/calendar/hooks/use-calendar-hotkeys.ts:65"
+        ]
+      },
+      {
+        "token": "calendar.period.today",
+        "locations": [
+          "apps/web/src/features/calendar/hooks/use-calendar-hotkeys.ts:91"
+        ]
+      },
+      {
+        "token": "calendar.view.day",
+        "locations": [
+          "apps/web/src/features/calendar/components/PeriodSelector.tsx:29"
+        ]
+      },
+      {
+        "token": "calendar.view.month",
+        "locations": [
+          "apps/web/src/features/calendar/components/PeriodSelector.tsx:19"
+        ]
+      },
+      {
+        "token": "calendar.view.week",
+        "locations": [
+          "apps/web/src/features/calendar/components/PeriodSelector.tsx:24"
+        ]
+      },
+      {
+        "token": "canvas.bringForward",
+        "locations": [
+          "apps/web/src/features/block-canvas/component/CanvasController.tsx:358"
+        ]
+      },
+      {
+        "token": "canvas.bringToFront",
+        "locations": [
+          "apps/web/src/features/block-canvas/component/CanvasController.tsx:342"
+        ]
+      },
+      {
+        "token": "canvas.cancel",
+        "locations": [
+          "apps/web/src/features/block-canvas/component/CanvasController.tsx:493"
+        ]
+      },
+      {
+        "token": "canvas.copy",
+        "locations": [
+          "apps/web/src/features/block-canvas/component/CanvasController.tsx:410"
+        ]
+      },
+      {
+        "token": "canvas.cut",
+        "locations": [
+          "apps/web/src/features/block-canvas/component/CanvasController.tsx:427"
+        ]
+      },
+      {
+        "token": "canvas.delete",
+        "locations": [
+          "apps/web/src/features/block-canvas/component/CanvasController.tsx:330"
+        ]
+      },
+      {
+        "token": "canvas.group",
+        "locations": [
+          "apps/web/src/features/block-canvas/component/CanvasController.tsx:691"
+        ]
+      },
+      {
+        "token": "canvas.handTool",
+        "locations": [
+          "apps/web/src/features/block-canvas/component/CanvasController.tsx:515"
+        ]
+      },
+      {
+        "token": "canvas.line.bent",
+        "locations": [
+          "apps/web/src/features/block-canvas/component/ToolBar.tsx:178"
+        ]
+      },
+      {
+        "token": "canvas.line.flow",
+        "locations": [
+          "apps/web/src/features/block-canvas/component/ToolBar.tsx:166"
+        ]
+      },
+      {
+        "token": "canvas.line.straight",
+        "locations": [
+          "apps/web/src/features/block-canvas/component/ToolBar.tsx:154"
+        ]
+      },
+      {
+        "token": "canvas.lineTool",
+        "locations": [
+          "apps/web/src/features/block-canvas/component/CanvasController.tsx:551"
+        ]
+      },
+      {
+        "token": "canvas.nudgeDown",
+        "locations": [
+          "apps/web/src/features/block-canvas/component/CanvasController.tsx:642"
+        ]
+      },
+      {
+        "token": "canvas.nudgeDownMore",
+        "locations": [
+          "apps/web/src/features/block-canvas/component/CanvasController.tsx:653"
+        ]
+      },
+      {
+        "token": "canvas.nudgeLeft",
+        "locations": [
+          "apps/web/src/features/block-canvas/component/CanvasController.tsx:664"
+        ]
+      },
+      {
+        "token": "canvas.nudgeLeftMore",
+        "locations": [
+          "apps/web/src/features/block-canvas/component/CanvasController.tsx:676"
+        ]
+      },
+      {
+        "token": "canvas.nudgeRight",
+        "locations": [
+          "apps/web/src/features/block-canvas/component/CanvasController.tsx:617"
+        ]
+      },
+      {
+        "token": "canvas.nudgeRightMore",
+        "locations": [
+          "apps/web/src/features/block-canvas/component/CanvasController.tsx:629"
+        ]
+      },
+      {
+        "token": "canvas.nudgeUp",
+        "locations": [
+          "apps/web/src/features/block-canvas/component/CanvasController.tsx:595"
+        ]
+      },
+      {
+        "token": "canvas.nudgeUpMore",
+        "locations": [
+          "apps/web/src/features/block-canvas/component/CanvasController.tsx:606"
+        ]
+      },
+      {
+        "token": "canvas.optZoom",
+        "locations": [
+          "apps/web/src/features/block-canvas/component/CanvasController.tsx:727"
+        ]
+      },
+      {
+        "token": "canvas.paste",
+        "locations": [
+          "apps/web/src/features/block-canvas/component/CanvasController.tsx:437"
+        ]
+      },
+      {
+        "token": "canvas.pencilTool",
+        "locations": [
+          "apps/web/src/features/block-canvas/component/CanvasController.tsx:537"
+        ]
+      },
+      {
+        "token": "canvas.redo",
+        "locations": [
+          "apps/web/src/features/block-canvas/component/CanvasController.tsx:481"
+        ]
+      },
+      {
+        "token": "canvas.selectAll",
+        "locations": [
+          "apps/web/src/features/block-canvas/component/CanvasController.tsx:398"
+        ]
+      },
+      {
+        "token": "canvas.selectTool",
+        "locations": [
+          "apps/web/src/features/block-canvas/component/CanvasController.tsx:504"
+        ]
+      },
+      {
+        "token": "canvas.sendBackward",
+        "locations": [
+          "apps/web/src/features/block-canvas/component/CanvasController.tsx:384"
+        ]
+      },
+      {
+        "token": "canvas.sendToBack",
+        "locations": [
+          "apps/web/src/features/block-canvas/component/CanvasController.tsx:372"
+        ]
+      },
+      {
+        "token": "canvas.shapeTool",
+        "locations": [
+          "apps/web/src/features/block-canvas/component/CanvasController.tsx:526"
+        ]
+      },
+      {
+        "token": "canvas.spaceGrab",
+        "locations": [
+          "apps/web/src/features/block-canvas/component/CanvasController.tsx:761"
+        ]
+      },
+      {
+        "token": "canvas.textTool",
+        "locations": [
+          "apps/web/src/features/block-canvas/component/CanvasController.tsx:562"
+        ]
+      },
+      {
+        "token": "canvas.undo",
+        "locations": [
+          "apps/web/src/features/block-canvas/component/CanvasController.tsx:470"
+        ]
+      },
+      {
+        "token": "canvas.ungroup",
+        "locations": [
+          "apps/web/src/features/block-canvas/component/CanvasController.tsx:704"
+        ]
+      },
+      {
+        "token": "canvas.zoomIn",
+        "locations": [
+          "apps/web/src/features/block-canvas/component/CanvasController.tsx:448"
+        ]
+      },
+      {
+        "token": "canvas.zoomInTool",
+        "locations": [
+          "apps/web/src/features/block-canvas/component/CanvasController.tsx:573"
+        ]
+      },
+      {
+        "token": "canvas.zoomOut",
+        "locations": [
+          "apps/web/src/features/block-canvas/component/CanvasController.tsx:459"
+        ]
+      },
+      {
+        "token": "canvas.zoomOutTool",
+        "locations": [
+          "apps/web/src/features/block-canvas/component/CanvasController.tsx:584"
+        ]
+      },
+      {
+        "token": "channel.cancelReply",
+        "locations": [
+          "apps/web/src/features/channel/Thread/create-thread-hotkeys.ts:255"
+        ]
+      },
+      {
+        "token": "channel.clearSelection",
+        "locations": [
+          "apps/web/src/features/channel/Channel/InlineMessageEditor.tsx:47",
+          "apps/web/src/features/channel/Channel/create-channel-hotkeys.ts:181"
+        ]
+      },
+      {
+        "token": "channel.deleteMessage",
+        "locations": [
+          "apps/web/src/features/channel/Channel/create-channel-hotkeys.ts:157"
+        ]
+      },
+      {
+        "token": "channel.editMessage",
+        "locations": [
+          "apps/web/src/features/channel/Channel/create-channel-hotkeys.ts:134"
+        ]
+      },
+      {
+        "token": "channel.expandThread",
+        "locations": [
+          "apps/web/src/features/channel/Thread/create-thread-hotkeys.ts:81"
+        ]
+      },
+      {
+        "token": "channel.findInChannel",
+        "locations": [
+          "apps/web/src/features/channel/Channel/create-channel-hotkeys.ts:212"
+        ]
+      },
+      {
+        "token": "channel.focusNextMessage",
+        "locations": [
+          "apps/web/src/features/channel/Channel/create-channel-hotkeys.ts:86"
+        ]
+      },
+      {
+        "token": "channel.focusPreviousMessage",
+        "locations": [
+          "apps/web/src/features/channel/Channel/create-channel-hotkeys.ts:193",
+          "apps/web/src/features/channel/Channel/create-channel-hotkeys.ts:71"
+        ]
+      },
+      {
+        "token": "channel.replyToMessage",
+        "locations": [
+          "apps/web/src/features/channel/Channel/create-channel-hotkeys.ts:115"
+        ]
+      },
+      {
+        "token": "channel.threadCollapse",
+        "locations": [
+          "apps/web/src/features/channel/Thread/create-thread-hotkeys.ts:138"
+        ]
+      },
+      {
+        "token": "channel.threadDeleteReply",
+        "locations": [
+          "apps/web/src/features/channel/Thread/create-thread-hotkeys.ts:220"
+        ]
+      },
+      {
+        "token": "channel.threadEditReply",
+        "locations": [
+          "apps/web/src/features/channel/Thread/create-thread-hotkeys.ts:190"
+        ]
+      },
+      {
+        "token": "channel.threadExit",
+        "locations": [
+          "apps/web/src/features/channel/Thread/create-thread-hotkeys.ts:153"
+        ]
+      },
+      {
+        "token": "channel.threadNextReply",
+        "locations": [
+          "apps/web/src/features/channel/Thread/create-thread-hotkeys.ts:119"
+        ]
+      },
+      {
+        "token": "channel.threadPreviousReply",
+        "locations": [
+          "apps/web/src/features/channel/Thread/create-thread-hotkeys.ts:99"
+        ]
+      },
+      {
+        "token": "channel.threadReply",
+        "locations": [
+          "apps/web/src/features/channel/Thread/create-thread-hotkeys.ts:167"
+        ]
+      },
+      {
+        "token": "chat.input.focus",
+        "locations": [
+          "apps/web/src/features/chat/SoupChatInput.tsx:60"
+        ]
+      },
+      {
+        "token": "chat.stop",
+        "locations": [
+          "apps/web/src/features/block-chat/component/Chat.tsx:304"
+        ]
+      },
+      {
+        "token": "code.escape",
+        "locations": [
+          "apps/web/src/features/block-code/component/CodeMirror.tsx:84"
+        ]
+      },
+      {
+        "token": "code.toggleComment",
+        "locations": [
+          "apps/web/src/features/block-code/component/CodeMirror.tsx:69"
+        ]
+      },
+      {
+        "token": "create.agent",
+        "locations": [
+          "apps/web/src/features/command/Launcher.tsx:501"
+        ]
+      },
+      {
+        "token": "create.automation",
+        "locations": [
+          "apps/web/src/features/command/Launcher.tsx:487"
+        ]
+      },
+      {
+        "token": "create.canvas",
+        "locations": [
+          "apps/web/src/features/block-project/component/ProjectCreateMenu.tsx:111",
+          "apps/web/src/features/command/Launcher.tsx:627"
+        ]
+      },
+      {
+        "token": "create.channel",
+        "locations": [
+          "apps/web/src/features/command/Launcher.tsx:612"
+        ]
+      },
+      {
+        "token": "create.chat",
+        "locations": [
+          "apps/web/src/features/block-project/component/ProjectCreateMenu.tsx:93",
+          "apps/web/src/features/command/Launcher.tsx:467"
+        ]
+      },
+      {
+        "token": "create.code",
+        "locations": [
+          "apps/web/src/features/command/Launcher.tsx:659"
+        ]
+      },
+      {
+        "token": "create.email",
+        "locations": [
+          "apps/web/src/features/command/Launcher.tsx:448"
+        ]
+      },
+      {
+        "token": "create.message",
+        "locations": [
+          "apps/web/src/features/command/Launcher.tsx:596"
+        ]
+      },
+      {
+        "token": "create.note",
+        "locations": [
+          "apps/web/src/features/block-project/component/ProjectCreateMenu.tsx:43",
+          "apps/web/src/features/command/Launcher.tsx:532"
+        ]
+      },
+      {
+        "token": "create.project",
+        "locations": [
+          "apps/web/src/features/block-project/component/ProjectCreateMenu.tsx:134",
+          "apps/web/src/features/command/Launcher.tsx:644"
+        ]
+      },
+      {
+        "token": "create.reminder",
+        "locations": [
+          "apps/web/src/features/command/Launcher.tsx:562"
+        ]
+      },
+      {
+        "token": "create.skill",
+        "locations": [
+          "apps/web/src/features/command/Launcher.tsx:518"
+        ]
+      },
+      {
+        "token": "create.snippet",
+        "locations": [
+          "apps/web/src/features/command/Launcher.tsx:580"
+        ]
+      },
+      {
+        "token": "create.task",
+        "locations": [
+          "apps/web/src/features/block-project/component/ProjectCreateMenu.tsx:64",
+          "apps/web/src/features/command/Launcher.tsx:547"
+        ]
+      },
+      {
+        "token": "drawer.close",
+        "locations": [
+          "apps/web/src/components/app/split-layout/components/SplitDrawer.tsx:20"
+        ]
+      },
+      {
+        "token": "email.blockSender",
+        "locations": [
+          "apps/web/src/features/block-email/util/emailHotkeys.ts:99"
+        ]
+      },
+      {
+        "token": "email.cancelReply",
+        "locations": [
+          "apps/web/src/features/block-email/component/BaseInput.tsx:1365",
+          "apps/web/src/features/block-email/component/Email.tsx:593"
+        ]
+      },
+      {
+        "token": "email.compose.edit.bccRecipients",
+        "locations": [
+          "apps/web/src/features/block-email/component/compose/ComposeLayout.tsx:118"
+        ]
+      },
+      {
+        "token": "email.compose.edit.ccRecipients",
+        "locations": [
+          "apps/web/src/features/block-email/component/compose/ComposeLayout.tsx:99"
+        ]
+      },
+      {
+        "token": "email.compose.edit.message",
+        "locations": [
+          "apps/web/src/features/block-email/component/compose/ComposeLayout.tsx:146"
+        ]
+      },
+      {
+        "token": "email.compose.edit.recipients",
+        "locations": [
+          "apps/web/src/features/block-email/component/compose/ComposeLayout.tsx:80"
+        ]
+      },
+      {
+        "token": "email.compose.edit.subject",
+        "locations": [
+          "apps/web/src/features/block-email/component/compose/ComposeLayout.tsx:132"
+        ]
+      },
+      {
+        "token": "email.forward",
+        "locations": [
+          "apps/web/src/features/block-email/util/emailHotkeys.ts:56"
+        ]
+      },
+      {
+        "token": "email.markSenderNoise",
+        "locations": [
+          "apps/web/src/features/block-email/util/emailHotkeys.ts:113"
+        ]
+      },
+      {
+        "token": "email.markSenderSignal",
+        "locations": [
+          "apps/web/src/features/block-email/util/emailHotkeys.ts:106"
+        ]
+      },
+      {
+        "token": "email.nextMessage",
+        "locations": [
+          "apps/web/src/features/block-email/util/emailHotkeys.ts:128"
+        ]
+      },
+      {
+        "token": "email.previousMessage",
+        "locations": [
+          "apps/web/src/features/block-email/component/BaseInput.tsx:1338",
+          "apps/web/src/features/block-email/util/emailHotkeys.ts:121"
+        ]
+      },
+      {
+        "token": "email.reply",
+        "locations": [
+          "apps/web/src/features/block-email/util/emailHotkeys.ts:47"
+        ]
+      },
+      {
+        "token": "email.replyAll",
+        "locations": [
+          "apps/web/src/features/block-email/util/emailHotkeys.ts:37"
+        ]
+      },
+      {
+        "token": "email.send",
+        "locations": [
+          "apps/web/src/features/block-email/component/BaseInput.tsx:1289",
+          "apps/web/src/features/block-email/component/compose/ComposeLayout.tsx:161"
+        ]
+      },
+      {
+        "token": "email.sendAndMarkDone",
+        "locations": [
+          "apps/web/src/features/block-email/component/BaseInput.tsx:1303"
+        ]
+      },
+      {
+        "token": "entity.action.assignee",
+        "locations": [
+          "apps/web/src/features/next-soup/actions/use-block-entity-commands.ts:496",
+          "apps/web/src/features/next-soup/actions/use-entity-action-hotkeys.ts:633"
+        ]
+      },
+      {
+        "token": "entity.action.copy",
+        "locations": [
+          "apps/web/src/features/next-soup/actions/use-entity-action-hotkeys.ts:391",
+          "apps/web/src/features/next-soup/soup-view/create-soup-entity-actions.ts:389"
+        ]
+      },
+      {
+        "token": "entity.action.copyBranchName",
+        "locations": [
+          "apps/web/src/features/block-md/component/TopBar.tsx:141",
+          "apps/web/src/features/block-md/component/TopBar.tsx:77",
+          "apps/web/src/features/next-soup/actions/use-block-entity-commands.ts:360",
+          "apps/web/src/features/next-soup/actions/use-entity-action-hotkeys.ts:467",
+          "apps/web/src/features/next-soup/soup-view/create-soup-entity-actions.ts:406"
+        ]
+      },
+      {
+        "token": "entity.action.copyEntityId",
+        "locations": [
+          "apps/web/src/components/app/split-layout/components/SplitFileMenu.tsx:495",
+          "apps/web/src/features/next-soup/actions/use-block-entity-commands.ts:386",
+          "apps/web/src/features/next-soup/actions/use-entity-action-hotkeys.ts:490"
+        ]
+      },
+      {
+        "token": "entity.action.copyLink",
+        "locations": [
+          "apps/web/src/components/app/split-layout/components/SplitFileMenu.tsx:484",
+          "apps/web/src/features/next-soup/actions/use-block-entity-commands.ts:338",
+          "apps/web/src/features/next-soup/actions/use-entity-action-hotkeys.ts:445",
+          "apps/web/src/features/next-soup/soup-view/create-soup-entity-actions.ts:398"
+        ]
+      },
+      {
+        "token": "entity.action.createReminder",
+        "locations": [
+          "apps/web/src/components/app/split-layout/components/SplitFileMenu.tsx:447",
+          "apps/web/src/features/next-soup/actions/use-block-entity-commands.ts:402",
+          "apps/web/src/features/next-soup/actions/use-entity-action-hotkeys.ts:517",
+          "apps/web/src/features/next-soup/soup-view/create-soup-entity-actions.ts:350"
+        ]
+      },
+      {
+        "token": "entity.action.delete",
+        "locations": [
+          "apps/web/src/features/next-soup/actions/use-entity-action-hotkeys.ts:287",
+          "apps/web/src/features/next-soup/soup-view/create-soup-entity-actions.ts:502"
+        ]
+      },
+      {
+        "token": "entity.action.favorite",
+        "locations": [
+          "apps/web/src/components/app/split-layout/components/SplitFileMenu.tsx:419",
+          "apps/web/src/features/next-soup/actions/use-block-entity-commands.ts:272",
+          "apps/web/src/features/next-soup/actions/use-entity-action-hotkeys.ts:362",
+          "apps/web/src/features/next-soup/soup-view/create-soup-entity-actions.ts:340"
+        ]
+      },
+      {
+        "token": "entity.action.markDone",
+        "locations": [
+          "apps/web/src/features/block-email/component/TopBar.tsx:203",
+          "apps/web/src/features/block-email/util/emailHotkeys.ts:64",
+          "apps/web/src/features/next-soup/actions/use-block-entity-commands.ts:203",
+          "apps/web/src/features/next-soup/actions/use-entity-action-hotkeys.ts:178",
+          "apps/web/src/features/next-soup/soup-view/create-soup-entity-actions.ts:186"
+        ]
+      },
+      {
+        "token": "entity.action.markNotDone",
+        "locations": [
+          "apps/web/src/features/block-email/component/TopBar.tsx:211",
+          "apps/web/src/features/block-email/util/emailHotkeys.ts:73",
+          "apps/web/src/features/next-soup/actions/use-entity-action-hotkeys.ts:203",
+          "apps/web/src/features/next-soup/soup-view/create-soup-entity-actions.ts:179"
+        ]
+      },
+      {
+        "token": "entity.action.markRead",
+        "locations": [
+          "apps/web/src/features/block-email/component/TopBar.tsx:225",
+          "apps/web/src/features/block-email/util/emailHotkeys.ts:91",
+          "apps/web/src/features/next-soup/actions/use-entity-action-hotkeys.ts:260",
+          "apps/web/src/features/next-soup/soup-view/create-soup-entity-actions.ts:209"
+        ]
+      },
+      {
+        "token": "entity.action.markUnread",
+        "locations": [
+          "apps/web/src/features/block-email/component/TopBar.tsx:218",
+          "apps/web/src/features/block-email/util/emailHotkeys.ts:82",
+          "apps/web/src/features/next-soup/actions/use-entity-action-hotkeys.ts:237",
+          "apps/web/src/features/next-soup/soup-view/create-soup-entity-actions.ts:199"
+        ]
+      },
+      {
+        "token": "entity.action.moveToFolder",
+        "locations": [
+          "apps/web/src/components/app/split-layout/components/SplitFileMenu.tsx:609",
+          "apps/web/src/features/next-soup/actions/use-block-entity-commands.ts:316",
+          "apps/web/src/features/next-soup/actions/use-entity-action-hotkeys.ts:417",
+          "apps/web/src/features/next-soup/soup-view/create-soup-entity-actions.ts:372"
+        ]
+      },
+      {
+        "token": "entity.action.priority",
+        "locations": [
+          "apps/web/src/features/next-soup/actions/use-block-entity-commands.ts:476",
+          "apps/web/src/features/next-soup/actions/use-entity-action-hotkeys.ts:610"
+        ]
+      },
+      {
+        "token": "entity.action.properties",
+        "locations": [
+          "apps/web/src/features/next-soup/actions/use-block-entity-commands.ts:434",
+          "apps/web/src/features/next-soup/actions/use-entity-action-hotkeys.ts:565"
+        ]
+      },
+      {
+        "token": "entity.action.rename",
+        "locations": [
+          "apps/web/src/components/app/split-layout/components/SplitFileMenu.tsx:556",
+          "apps/web/src/features/block-channel/component/NewChannelBlockAdapter.tsx:228",
+          "apps/web/src/features/next-soup/actions/use-block-entity-commands.ts:251",
+          "apps/web/src/features/next-soup/actions/use-entity-action-hotkeys.ts:328",
+          "apps/web/src/features/next-soup/soup-view/create-soup-entity-actions.ts:311",
+          "apps/web/src/features/next-soup/soup-view/create-soup-entity-actions.ts:327"
+        ]
+      },
+      {
+        "token": "entity.action.share",
+        "locations": [
+          "apps/web/src/features/next-soup/actions/use-entity-action-hotkeys.ts:543"
+        ]
+      },
+      {
+        "token": "entity.action.status",
+        "locations": [
+          "apps/web/src/features/next-soup/actions/use-block-entity-commands.ts:516",
+          "apps/web/src/features/next-soup/actions/use-entity-action-hotkeys.ts:656"
+        ]
+      },
+      {
+        "token": "entity.action.tags",
+        "locations": [
+          "apps/web/src/components/app/split-layout/components/SplitFileMenu.tsx:463",
+          "apps/web/src/features/next-soup/actions/use-block-entity-commands.ts:452",
+          "apps/web/src/features/next-soup/actions/use-entity-action-hotkeys.ts:584"
+        ]
+      },
+      {
+        "token": "entity.jump.end",
+        "locations": [
+          "apps/web/src/features/next-soup/soup-view/use-soup-view-hotkeys.ts:114"
+        ]
+      },
+      {
+        "token": "entity.jump.home",
+        "locations": [
+          "apps/web/src/features/next-soup/soup-view/use-soup-view-hotkeys.ts:81"
+        ]
+      },
+      {
+        "token": "entity.open",
+        "locations": [
+          "apps/web/src/features/next-soup/soup-view/use-soup-view-hotkeys.ts:148"
+        ]
+      },
+      {
+        "token": "entity.select.end",
+        "locations": [
+          "apps/web/src/features/next-soup/soup-view/use-soup-navigation-hotkeys.ts:320"
+        ]
+      },
+      {
+        "token": "entity.select.start",
+        "locations": [
+          "apps/web/src/features/next-soup/soup-view/use-soup-navigation-hotkeys.ts:308"
+        ]
+      },
+      {
+        "token": "entity.step.end",
+        "locations": [
+          "apps/web/src/features/next-soup/soup-view/use-soup-navigation-hotkeys.ts:266"
+        ]
+      },
+      {
+        "token": "entity.step.start",
+        "locations": [
+          "apps/web/src/features/next-soup/soup-view/use-soup-navigation-hotkeys.ts:287"
+        ]
+      },
+      {
+        "token": "global.commandMenu",
+        "locations": [
+          "apps/web/src/components/app/GlobalHotkeys.tsx:231",
+          "apps/web/src/features/next-soup/soup-view/use-soup-view-hotkeys.ts:278"
+        ]
+      },
+      {
+        "token": "global.createCommand",
+        "locations": [
+          "apps/web/src/components/app/GlobalHotkeys.tsx:168"
+        ]
+      },
+      {
+        "token": "global.createNewSplit",
+        "locations": [
+          "apps/web/src/components/app/GlobalHotkeys.tsx:300"
+        ]
+      },
+      {
+        "token": "global.instructions",
+        "locations": [
+          "apps/web/src/components/app/GlobalHotkeys.tsx:354"
+        ]
+      },
+      {
+        "token": "global.inviteTeam",
+        "locations": [
+          "apps/web/src/components/app/app-sidebar/sidebar.tsx:407"
+        ]
+      },
+      {
+        "token": "global.redo",
+        "locations": [
+          "apps/web/src/components/app/GlobalHotkeys.tsx:585"
+        ]
+      },
+      {
+        "token": "global.toggleSettings",
+        "locations": [
+          "apps/web/src/components/app/GlobalHotkeys.tsx:319"
+        ]
+      },
+      {
+        "token": "global.toggleSidebar",
+        "locations": [
+          "apps/web/src/components/app/app-sidebar/sidebar.tsx:367"
+        ]
+      },
+      {
+        "token": "global.undo",
+        "locations": [
+          "apps/web/src/components/app/GlobalHotkeys.tsx:571"
+        ]
+      },
+      {
+        "token": "md.find",
+        "locations": [
+          "apps/web/src/features/block-md/component/FindAndReplace.tsx:268"
+        ]
+      },
+      {
+        "token": "md.toggleStateDebugger",
+        "locations": [
+          "apps/web/src/features/block-md/component/useMarkdownCommands.ts:120"
+        ]
+      },
+      {
+        "token": "sidebar.goTo.activity",
+        "locations": [
+          "apps/web/src/components/app/app-sidebar/sidebar.tsx:1038"
+        ]
+      },
+      {
+        "token": "sidebar.goTo.agents",
+        "locations": [
+          "apps/web/src/components/app/app-sidebar/sidebar.tsx:212"
+        ]
+      },
+      {
+        "token": "sidebar.goTo.calendar",
+        "locations": [
+          "apps/web/src/components/app/app-sidebar/sidebar.tsx:260"
+        ]
+      },
+      {
+        "token": "sidebar.goTo.calls",
+        "locations": [
+          "apps/web/src/components/app/app-sidebar/sidebar.tsx:1002"
+        ]
+      },
+      {
+        "token": "sidebar.goTo.channels",
+        "locations": [
+          "apps/web/src/components/app/app-sidebar/sidebar.tsx:268"
+        ]
+      },
+      {
+        "token": "sidebar.goTo.companies",
+        "locations": [
+          "apps/web/src/components/app/app-sidebar/sidebar.tsx:1011"
+        ]
+      },
+      {
+        "token": "sidebar.goTo.documents",
+        "locations": [
+          "apps/web/src/components/app/app-sidebar/sidebar.tsx:228"
+        ]
+      },
+      {
+        "token": "sidebar.goTo.gettingStarted",
+        "locations": [
+          "apps/web/src/components/app/app-sidebar/sidebar.tsx:1029"
+        ]
+      },
+      {
+        "token": "sidebar.goTo.home",
+        "locations": [
+          "apps/web/src/components/app/app-sidebar/sidebar.tsx:1020"
+        ]
+      },
+      {
+        "token": "sidebar.goTo.inbox",
+        "locations": [
+          "apps/web/src/components/app/app-sidebar/sidebar.tsx:194"
+        ]
+      },
+      {
+        "token": "sidebar.goTo.mail",
+        "locations": [
+          "apps/web/src/components/app/app-sidebar/sidebar.tsx:220"
+        ]
+      },
+      {
+        "token": "sidebar.goTo.markdownDocuments",
+        "locations": [
+          "apps/web/src/components/app/app-sidebar/sidebar.tsx:243"
+        ]
+      },
+      {
+        "token": "sidebar.goTo.recent",
+        "locations": [
+          "apps/web/src/components/app/app-sidebar/sidebar.tsx:1049"
+        ]
+      },
+      {
+        "token": "sidebar.goTo.search",
+        "locations": [
+          "apps/web/src/components/app/app-sidebar/sidebar.tsx:202"
+        ]
+      },
+      {
+        "token": "sidebar.goTo.tasks",
+        "locations": [
+          "apps/web/src/components/app/app-sidebar/sidebar.tsx:252"
+        ]
+      },
+      {
+        "token": "sidebar.goToLeader",
+        "locations": [
+          "apps/web/src/components/app/app-sidebar/sidebar.tsx:439"
+        ]
+      },
+      {
+        "token": "soup.askAi",
+        "locations": [
+          "apps/web/src/features/next-soup/soup-view/search-ask-ai-button.tsx:34"
+        ]
+      },
+      {
+        "token": "soup.dismiss",
+        "locations": [
+          "apps/web/src/features/next-soup/soup-view/use-soup-view-hotkeys.ts:315"
+        ]
+      },
+      {
+        "token": "soup.filter",
+        "locations": [
+          "apps/web/src/features/next-soup/soup-view/filters-bar/search/search-filters-row.tsx:23",
+          "apps/web/src/features/next-soup/soup-view/filters-bar/unified-filter-dropdown.tsx:898"
+        ]
+      },
+      {
+        "token": "soup.openSearch",
+        "locations": [
+          "apps/web/src/features/next-soup/soup-view/soup-view.tsx:531"
+        ]
+      },
+      {
+        "token": "soup.sort",
+        "locations": [
+          "apps/web/src/features/next-soup/soup-view/filters-bar/soup-view-context-sort.tsx:32"
+        ]
+      },
+      {
+        "token": "soup.tabs",
+        "locations": [
+          "apps/web/src/features/next-soup/soup-view/use-soup-view-hotkeys.ts:381"
+        ]
+      },
+      {
+        "token": "soup.tabs.next",
+        "locations": [
+          "apps/web/src/features/next-soup/soup-view/use-soup-view-hotkeys.ts:410"
+        ]
+      },
+      {
+        "token": "soup.tabs.prev",
+        "locations": [
+          "apps/web/src/features/next-soup/soup-view/use-soup-view-hotkeys.ts:427"
+        ]
+      },
+      {
+        "token": "split.close",
+        "locations": [
+          "apps/web/src/components/app/split-layout/registerSplitHotkeys.ts:51"
+        ]
+      },
+      {
+        "token": "split.go.back",
+        "locations": [
+          "apps/web/src/components/app/split-layout/registerSplitHotkeys.ts:76"
+        ]
+      },
+      {
+        "token": "split.go.forward",
+        "locations": [
+          "apps/web/src/components/app/split-layout/registerSplitHotkeys.ts:89"
+        ]
+      },
+      {
+        "token": "unifiedList.navigation.child",
+        "locations": [
+          "apps/web/src/features/next-soup/soup-view/use-soup-navigation-hotkeys.ts:389"
+        ]
+      },
+      {
+        "token": "unifiedList.navigation.parent",
+        "locations": [
+          "apps/web/src/features/next-soup/soup-view/use-soup-navigation-hotkeys.ts:358"
+        ]
+      },
+      {
+        "token": "unifiedList.togglePreview",
+        "locations": [
+          "apps/web/src/components/app/split-layout/components/PreviewButton.tsx:48"
+        ]
+      },
+      {
+        "token": "window.focusSplitLeft",
+        "locations": [
+          "apps/web/src/components/app/split-layout/registerSplitHotkeys.ts:114"
+        ]
+      },
+      {
+        "token": "window.focusSplitRight",
+        "locations": [
+          "apps/web/src/components/app/split-layout/registerSplitHotkeys.ts:101"
+        ]
+      },
+      {
+        "token": "window.spotlight.toggle",
+        "locations": [
+          "apps/web/src/components/app/split-layout/registerSplitHotkeys.ts:59"
+        ]
+      }
+    ],
+    "settings_surfaces": [
+      {
+        "tab": "Account",
+        "slug": "account"
+      },
+      {
+        "tab": "Admin",
+        "slug": "admin"
+      },
+      {
+        "tab": "AI Memory",
+        "slug": "ai-memory"
+      },
+      {
+        "tab": "Appearance",
+        "slug": "appearance"
+      },
+      {
+        "tab": "Billing",
+        "slug": "billing"
+      },
+      {
+        "tab": "Bots",
+        "slug": "bots"
+      },
+      {
+        "tab": "Connected",
+        "slug": "connections"
+      },
+      {
+        "tab": "CRM",
+        "slug": "crm"
+      },
+      {
+        "tab": "Email",
+        "slug": "email"
+      },
+      {
+        "tab": "GitHub",
+        "slug": "github"
+      },
+      {
+        "tab": "Inbox",
+        "slug": "inbox"
+      },
+      {
+        "tab": "Agent",
+        "slug": "mcp-server"
+      },
+      {
+        "tab": "Mobile",
+        "slug": "mobile"
+      },
+      {
+        "tab": "Mobile App",
+        "slug": "mobile-app"
+      },
+      {
+        "tab": "Notifications",
+        "slug": "notifications"
+      },
+      {
+        "tab": "Organization",
+        "slug": "organization"
+      },
+      {
+        "tab": "Shortcuts",
+        "slug": "shortcuts"
+      },
+      {
+        "tab": "Subscription",
+        "slug": "subscription"
+      },
+      {
+        "tab": "Tags",
+        "slug": "tags"
+      },
+      {
+        "tab": "Team",
+        "slug": "team"
+      }
+    ],
+    "websocket_events": [
+      "agent_session_log",
+      "agent_session_renamed",
+      "comms_attachment",
+      "comms_message",
+      "comms_reaction",
+      "comms_typing",
+      "contacts_invalidation",
+      "notification_status_updated",
+      "refresh_calendar",
+      "refresh_email",
+      "starter_docs_initialized",
+      "task_duplicate_matches_updated"
+    ]
+  }
+}

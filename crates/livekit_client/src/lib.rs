@@ -7,6 +7,8 @@ pub use remote_video_track_view::{RemoteVideoTrackView, RemoteVideoTrackViewEven
 use rodio::DeviceTrait as _;
 use serde::{Deserialize, Serialize};
 
+#[cfg(target_os = "macos")]
+mod camera_health;
 mod record;
 pub use record::CaptureInput;
 

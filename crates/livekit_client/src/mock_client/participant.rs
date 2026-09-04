@@ -6,9 +6,13 @@ use crate::{
 use anyhow::Result;
 use collections::HashMap;
 use gpui::{
-    AsyncApp, DevicePixels, ScreenCaptureSource, ScreenCaptureStream, SourceMetadata, size,
+    AppContext as _, AsyncApp, DevicePixels, Entity, ScreenCaptureSource, ScreenCaptureStream,
+    SourceMetadata, size,
 };
 use std::sync::{Arc, atomic::AtomicU64};
+
+#[cfg(target_os = "macos")]
+use crate::{CameraCaptureStream, CameraPreviewView};
 
 #[derive(Clone, Debug)]
 pub struct LocalParticipant {
@@ -97,6 +101,33 @@ impl LocalParticipant {
                 sid,
             },
             Box::new(TestScreenCaptureStream {}),
+        ))
+    }
+
+    #[cfg(target_os = "macos")]
+    pub async fn publish_camera_track(
+        &self,
+        _device_id: Option<String>,
+        _cx: &mut AsyncApp,
+    ) -> Result<(
+        LocalTrackPublication,
+        CameraCaptureStream,
+        Entity<CameraPreviewView>,
+    )> {
+        let server = self.room.test_server();
+        let sid = server
+            .publish_video_track(self.room.token(), LocalVideoTrack {})
+            .await?;
+        let preview = _cx.new(|_cx| CameraPreviewView {});
+        Ok((
+            LocalTrackPublication {
+                room: self.room.downgrade(),
+                sid,
+            },
+            CameraCaptureStream {
+                device_id: _device_id.unwrap_or_else(|| "test-camera".into()),
+            },
+            preview,
         ))
     }
 

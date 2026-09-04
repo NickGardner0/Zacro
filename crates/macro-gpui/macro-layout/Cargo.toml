@@ -1,0 +1,22 @@
+[package]
+name = "macro_layout"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[lib]
+path = "src/macro_layout.rs"
+
+[dependencies]
+gpui.workspace = true
+icons.workspace = true
+macro_theme.workspace = true
+macro_models.workspace = true
+macro_ui.workspace = true
+
+[dev-dependencies]
+gpui = { workspace = true, features = ["test-support"] }
+settings = { workspace = true, features = ["test-support"] }
+serde_json.workspace = true
+theme.workspace = true
+theme_settings.workspace = true

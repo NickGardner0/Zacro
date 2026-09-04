@@ -1,0 +1,248 @@
+name: Macro GPUI
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/macro_gpui.yml"
+      - "Cargo.lock"
+      - "Cargo.toml"
+      - "crates/livekit_client/**"
+      - "crates/macro-gpui/**"
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/macro_gpui.yml"
+      - "Cargo.lock"
+      - "Cargo.toml"
+      - "crates/livekit_client/**"
+      - "crates/macro-gpui/**"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Semantic version for a signed Macro release
+        required: true
+        default: 0.1.0
+        type: string
+      build_number:
+        description: Monotonic macOS bundle build number
+        required: true
+        default: "1"
+        type: string
+      update_base_url:
+        description: HTTPS directory that will host the release archive
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: macro-gpui-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test-and-bundle-macos:
+    runs-on: macos-15
+    timeout-minutes: 90
+    env:
+      CARGO_INCREMENTAL: "0"
+      CARGO_TERM_COLOR: always
+      RUST_BACKTRACE: "1"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
+        with:
+          clean: false
+
+      - name: Configure Cargo for CI
+        run: |
+          mkdir -p ../.cargo
+          cp .cargo/ci-config.toml ../.cargo/config.toml
+
+      - name: Check formatting
+        run: >-
+          cargo fmt --check
+          -p macro_api -p macro_app -p macro_canvas -p macro_editor
+          -p macro_entity -p macro_layout -p macro_list -p macro_metrics
+          -p macro_models -p macro_realtime -p macro_store -p macro_sync
+          -p macro_theme -p macro_updater -p macro_parity -p macro_ui
+          -p livekit_client
+
+      - name: Verify browser and native collaboration fixture
+        working-directory: crates/macro-gpui/macro-sync/fixtures
+        run: |
+          npm ci --ignore-scripts --no-audit --no-fund
+          node verify_markdown_two_client.mjs
+
+      - name: Test native parity crates
+        run: >-
+          cargo test
+          -p macro_api -p macro_app -p macro_canvas -p macro_editor
+          -p macro_entity -p macro_layout -p macro_list -p macro_metrics
+          -p macro_models -p macro_realtime -p macro_store -p macro_sync
+          -p macro_theme -p macro_updater -p macro_parity -p macro_ui
+          -p livekit_client --lib
+
+      - name: Check application graph
+        run: |
+          cargo check -p macro_sync --examples
+          cargo check -p macro_app
+
+      - name: Run optimized large-data performance soak
+        run: cargo run -p macro_parity --bin macro_performance_soak
+
+      - name: Upload performance soak report
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4.4.3
+        with:
+          name: macro-gpui-performance-soak
+          path: target/macro-gpui/performance-soak.json
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Measure release GPUI interaction latency
+        run: python3 crates/macro-gpui/scripts/measure-gpui-interactions.py
+
+      - name: Upload GPUI interaction performance attestation
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4.4.3
+        with:
+          name: macro-gpui-interaction-performance
+          path: target/macro-gpui/performance-current/
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Capture deterministic GPUI light and dark fixtures
+        run: python3 crates/macro-gpui/scripts/capture-gpui-fixtures.py
+
+      - name: Upload GPUI candidate captures
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4.4.3
+        with:
+          name: macro-gpui-visual-candidates
+          path: target/macro-gpui/visual-current/
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Build recoverable ad-hoc bundle
+        run: crates/macro-gpui/scripts/bundle-macos.sh debug
+
+      - name: Verify bundle identity and signature
+        run: |
+          test "$(defaults read "$PWD/target/macro-gpui/debug/Macro.app/Contents/Info" CFBundleIdentifier)" = "com.macro.desktop.gpui"
+          codesign --verify --deep --strict "$PWD/target/macro-gpui/debug/Macro.app"
+          test -f "$PWD/target/macro-gpui/debug/update-manifest.json"
+
+      - name: Upload unsigned test bundle
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4.4.3
+        with:
+          name: macro-gpui-macos-debug
+          path: |
+            target/macro-gpui/debug/Macro.app
+            target/macro-gpui/debug/Macro-*-macos.zip
+            target/macro-gpui/debug/update-manifest.json
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Remove temporary Cargo configuration
+        if: always()
+        run: rm -f ../.cargo/config.toml
+
+  signed-notarized-release-macos:
+    if: github.event_name == 'workflow_dispatch'
+    needs: test-and-bundle-macos
+    runs-on: macos-15
+    timeout-minutes: 90
+    environment: macro-production
+    permissions:
+      contents: read
+    env:
+      CARGO_INCREMENTAL: "0"
+      CARGO_TERM_COLOR: always
+      MACRO_VERSION: ${{ inputs.version }}
+      MACRO_BUILD_NUMBER: ${{ inputs.build_number }}
+      MACRO_UPDATE_BASE_URL: ${{ inputs.update_base_url }}
+      MACRO_CODESIGN_IDENTITY: ${{ secrets.MACRO_CODESIGN_IDENTITY }}
+      MACRO_TEAM_IDENTIFIER: ${{ secrets.MACRO_TEAM_IDENTIFIER }}
+      MACRO_NOTARY_PROFILE: macro-gpui-ci
+      MACRO_POSTHOG_API_KEY: ${{ secrets.MACRO_POSTHOG_API_KEY }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
+        with:
+          clean: false
+
+      - name: Configure Cargo for CI
+        run: |
+          mkdir -p ../.cargo
+          cp .cargo/ci-config.toml ../.cargo/config.toml
+
+      - name: Import Developer ID certificate
+        env:
+          CERTIFICATE_P12_BASE64: ${{ secrets.MACRO_DEVELOPER_ID_CERTIFICATE_P12 }}
+          CERTIFICATE_PASSWORD: ${{ secrets.MACRO_DEVELOPER_ID_CERTIFICATE_PASSWORD }}
+          KEYCHAIN_PASSWORD: ${{ secrets.MACRO_RELEASE_KEYCHAIN_PASSWORD }}
+        run: |
+          test -n "$CERTIFICATE_P12_BASE64"
+          test -n "$CERTIFICATE_PASSWORD"
+          test -n "$KEYCHAIN_PASSWORD"
+          test -n "$MACRO_CODESIGN_IDENTITY"
+          test -n "$MACRO_TEAM_IDENTIFIER"
+          keychain="$RUNNER_TEMP/macro-release.keychain-db"
+          certificate="$RUNNER_TEMP/macro-developer-id.p12"
+          printf '%s' "$CERTIFICATE_P12_BASE64" | base64 -D > "$certificate"
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$keychain"
+          security set-keychain-settings -lut 21600 "$keychain"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$keychain"
+          security import "$certificate" -k "$keychain" -P "$CERTIFICATE_PASSWORD" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" "$keychain"
+          security list-keychains -d user -s "$keychain" login.keychain-db
+          rm -f "$certificate"
+          echo "MACRO_RELEASE_KEYCHAIN=$keychain" >> "$GITHUB_ENV"
+
+      - name: Configure Apple notarization credentials
+        env:
+          NOTARY_APPLE_ID: ${{ secrets.MACRO_NOTARY_APPLE_ID }}
+          NOTARY_APP_PASSWORD: ${{ secrets.MACRO_NOTARY_APP_PASSWORD }}
+        run: |
+          test -n "$NOTARY_APPLE_ID"
+          test -n "$NOTARY_APP_PASSWORD"
+          xcrun notarytool store-credentials "$MACRO_NOTARY_PROFILE" \
+            --apple-id "$NOTARY_APPLE_ID" \
+            --team-id "$MACRO_TEAM_IDENTIFIER" \
+            --password "$NOTARY_APP_PASSWORD"
+
+      - name: Build, sign, notarize, and staple release
+        run: crates/macro-gpui/scripts/bundle-macos.sh release
+
+      - name: Verify signed release identity and update manifest
+        run: |
+          bundle="$PWD/target/macro-gpui/release/Macro.app"
+          manifest="$PWD/target/macro-gpui/release/update-manifest.json"
+          codesign --verify --deep --strict --verbose=2 "$bundle"
+          xcrun stapler validate "$bundle"
+          spctl --assess --type execute --verbose=4 "$bundle"
+          test "$(defaults read "$bundle/Contents/Info" CFBundleIdentifier)" = "com.macro.desktop.gpui"
+          test "$(jq -r .version "$manifest")" = "$MACRO_VERSION"
+          test "$(jq -r .build "$manifest")" = "$MACRO_BUILD_NUMBER"
+          test "$(jq -r .team_identifier "$manifest")" = "$MACRO_TEAM_IDENTIFIER"
+          test "$(jq -r .url "$manifest")" = "${MACRO_UPDATE_BASE_URL%/}/Macro-$MACRO_VERSION-macos.zip"
+          shasum -a 256 -c <(printf '%s  %s\n' "$(jq -r .sha256 "$manifest")" "target/macro-gpui/release/Macro-$MACRO_VERSION-macos.zip")
+
+      - name: Upload signed notarized release
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4.4.3
+        with:
+          name: Macro-${{ inputs.version }}-signed-notarized
+          path: |
+            target/macro-gpui/release/Macro.app
+            target/macro-gpui/release/Macro-${{ inputs.version }}-macos.zip
+            target/macro-gpui/release/update-manifest.json
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Remove release keychain and temporary Cargo configuration
+        if: always()
+        run: |
+          if [ -n "${MACRO_RELEASE_KEYCHAIN:-}" ]; then
+            security delete-keychain "$MACRO_RELEASE_KEYCHAIN" || true
+          fi
+          rm -f ../.cargo/config.toml

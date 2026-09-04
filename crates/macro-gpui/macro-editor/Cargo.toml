@@ -1,0 +1,35 @@
+[package]
+name = "macro_editor"
+version = "0.1.0"
+edition = "2024"
+publish = false
+license = "AGPL-3.0-only"
+
+[lib]
+path = "src/macro_editor.rs"
+
+[dependencies]
+diffy = "0.4.2"
+editor.workspace = true
+gpui.workspace = true
+language.workspace = true
+markdown.workspace = true
+pulldown-cmark = { workspace = true, features = ["html"] }
+regex.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+similar = "2.7.0"
+text.workspace = true
+ui.workspace = true
+url.workspace = true
+uuid.workspace = true
+
+[dev-dependencies]
+assets.workspace = true
+gpui = { workspace = true, features = ["test-support"] }
+settings = { workspace = true, features = ["test-support"] }
+theme.workspace = true
+theme_settings.workspace = true
+
+[lints]
+workspace = true

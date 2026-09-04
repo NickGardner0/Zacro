@@ -9,11 +9,15 @@ use playback::capture_local_video_track;
 use settings::Settings;
 use std::sync::{Arc, atomic::AtomicU64};
 
+#[cfg(target_os = "macos")]
+mod camera;
 #[cfg(target_os = "linux")]
 mod linux;
 mod playback;
 
 use crate::{ConnectionQuality, LocalTrack, Participant, RemoteTrack, RoomEvent, TrackPublication};
+#[cfg(target_os = "macos")]
+pub use camera::{CameraCaptureStream, CameraDevice, CameraPreviewView, available_camera_devices};
 pub use livekit::SessionStats;
 pub use livekit::webrtc::stats::RtcStats;
 pub use playback::AudioStream;
@@ -188,6 +192,33 @@ impl LocalParticipant {
             .await?;
 
         Ok((publication, stream))
+    }
+
+    #[cfg(target_os = "macos")]
+    pub async fn publish_camera_track(
+        &self,
+        device_id: Option<String>,
+        cx: &mut AsyncApp,
+    ) -> Result<(
+        LocalTrackPublication,
+        CameraCaptureStream,
+        gpui::Entity<CameraPreviewView>,
+    )> {
+        let (track, stream, frames) = camera::capture_local_camera_track(device_id, cx).await?;
+        let publication = self
+            .publish_track(
+                livekit::track::LocalTrack::Video(track.0),
+                livekit::options::TrackPublishOptions {
+                    source: livekit::track::TrackSource::Camera,
+                    video_codec: livekit::options::VideoCodec::VP8,
+                    ..Default::default()
+                },
+                cx,
+            )
+            .await?;
+        use gpui::AppContext as _;
+        let preview = cx.new(|cx| CameraPreviewView::new(frames, cx));
+        Ok((publication, stream, preview))
     }
 
     async fn publish_track(

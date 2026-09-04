@@ -217,6 +217,17 @@ impl A11y {
         self.active_this_frame
     }
 
+    /// Forces accessibility tree construction in deterministic/headless tests.
+    ///
+    /// Production windows still derive this flag exclusively from their
+    /// platform adapter. Test renderers do not have an operating-system
+    /// accessibility service to activate the adapter, so visual/accessibility
+    /// fixtures use this hook before requesting a frame.
+    #[cfg(any(test, feature = "test-support"))]
+    pub(crate) fn set_debug_active(&self, active: bool) {
+        self.active_flag.store(active, Ordering::SeqCst);
+    }
+
     pub(crate) fn set_focusable(&mut self, node_id: NodeId, focus_id: FocusId) {
         self.focus_ids.insert(node_id, focus_id);
     }

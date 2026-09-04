@@ -2674,6 +2674,20 @@ impl Editor {
         self.display_map.update(cx, |map, cx| map.snapshot(cx))
     }
 
+    /// Returns the current local selections as UTF-8 byte offsets in the
+    /// editor's visible multi-buffer text. This intentionally exposes values,
+    /// rather than the editor's internal selection collection, so embedded
+    /// editing surfaces can bridge selection state to an external
+    /// collaboration protocol without coupling to selection internals.
+    pub fn selection_offset_ranges(&self, cx: &mut App) -> Vec<Range<usize>> {
+        let display_snapshot = self.display_snapshot(cx);
+        self.selections
+            .all::<MultiBufferOffset>(&display_snapshot)
+            .into_iter()
+            .map(|selection| selection.start.0..selection.end.0)
+            .collect()
+    }
+
     pub fn deploy_mouse_context_menu(
         &mut self,
         position: gpui::Point<Pixels>,

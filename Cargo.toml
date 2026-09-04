@@ -245,6 +245,23 @@ members = [
     "crates/ztracing",
     "crates/ztracing_macro",
 
+    "crates/macro-gpui/macro-models",
+    "crates/macro-gpui/macro-metrics",
+    "crates/macro-gpui/macro-theme",
+    "crates/macro-gpui/macro-api",
+    "crates/macro-gpui/macro-realtime",
+    "crates/macro-gpui/macro-store",
+    "crates/macro-gpui/macro-entity",
+    "crates/macro-gpui/macro-editor",
+    "crates/macro-gpui/macro-canvas",
+    "crates/macro-gpui/macro-sync",
+    "crates/macro-gpui/macro-updater",
+    "crates/macro-gpui/macro-parity",
+    "crates/macro-gpui/macro-ui",
+    "crates/macro-gpui/macro-layout",
+    "crates/macro-gpui/macro-list",
+    "crates/macro-gpui/macro-app",
+
     #
     # Extensions
     #
@@ -505,6 +522,22 @@ zlog = { path = "crates/zlog" }
 zlog_settings = { path = "crates/zlog_settings" }
 ztracing = { path = "crates/ztracing" }
 ztracing_macro = { path = "crates/ztracing_macro" }
+macro_models = { path = "crates/macro-gpui/macro-models" }
+macro_metrics = { path = "crates/macro-gpui/macro-metrics" }
+macro_theme = { path = "crates/macro-gpui/macro-theme" }
+macro_api = { path = "crates/macro-gpui/macro-api" }
+macro_realtime = { path = "crates/macro-gpui/macro-realtime" }
+macro_store = { path = "crates/macro-gpui/macro-store" }
+macro_entity = { path = "crates/macro-gpui/macro-entity" }
+macro_editor = { path = "crates/macro-gpui/macro-editor" }
+macro_canvas = { path = "crates/macro-gpui/macro-canvas" }
+macro_sync = { path = "crates/macro-gpui/macro-sync" }
+macro_updater = { path = "crates/macro-gpui/macro-updater" }
+macro_parity = { path = "crates/macro-gpui/macro-parity" }
+macro_ui = { path = "crates/macro-gpui/macro-ui" }
+macro_layout = { path = "crates/macro-gpui/macro-layout" }
+macro_list = { path = "crates/macro-gpui/macro-list" }
+macro_app = { path = "crates/macro-gpui/macro-app" }
 
 #
 # External crates
@@ -671,6 +704,9 @@ libwebrtc = "0.3.26"
 linkify = "0.10.0"
 livekit = { version = "0.7.32", features = ["tokio", "rustls-tls-native-roots"] }
 log = { version = "0.4.16", features = ["kv_unstable_serde", "serde"] }
+loro = "=1.13.7"
+loro-internal = "=1.13.7"
+loro-kv-store = "=1.13.7"
 lru = "0.16"
 lsp-types = { git = "https://github.com/zed-industries/lsp-types", rev = "f4dfa89a21ca35cd929b70354b1583fabae325f8" }
 mach2 = "0.5"
@@ -1024,6 +1060,27 @@ wasmtime-environ = { opt-level = 3 }
 wasmtime-internal-cranelift = { opt-level = 3 }
 minidumper = { opt-level = 3 }
 serde_json = { opt-level = 3 }
+# The Macro binary is commonly launched with `cargo run -p macro_app` while it
+# is under active parity development. Keep its native product code optimized in
+# the dev profile so input handling, large-list reconciliation, Markdown/Loro
+# projection, and canvas geometry are not compared to Macro's production build
+# through an opt-level-0 artifact. Debug symbols and assertions remain enabled.
+macro_api = { opt-level = 2 }
+macro_app = { opt-level = 2 }
+macro_canvas = { opt-level = 2 }
+macro_editor = { opt-level = 2 }
+macro_entity = { opt-level = 2 }
+macro_layout = { opt-level = 2 }
+macro_list = { opt-level = 2 }
+macro_metrics = { opt-level = 2 }
+macro_models = { opt-level = 2 }
+macro_parity = { opt-level = 2 }
+macro_realtime = { opt-level = 2 }
+macro_store = { opt-level = 2 }
+macro_sync = { opt-level = 2 }
+macro_theme = { opt-level = 2 }
+macro_ui = { opt-level = 2 }
+macro_updater = { opt-level = 2 }
 # Build single-source-file crates with cg=1 as it helps make `cargo build` of a whole workspace a bit faster
 activity_indicator = { codegen-units = 1 }
 assets = { codegen-units = 1 }

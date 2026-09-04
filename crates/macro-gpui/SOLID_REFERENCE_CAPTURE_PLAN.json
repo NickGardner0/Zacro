@@ -1,0 +1,60 @@
+{
+  "schema": "macro.gpui.solid-reference-plan.v1",
+  "fixture_profile": "macro-local-e2e-smoke",
+  "macro_revision": "7324c6adaee90070e64bcabf3c0d77600c96db71",
+  "viewport": {
+    "width": 1440,
+    "height": 960,
+    "device_scale_factor": 2,
+    "screenshot_scale": "device"
+  },
+  "locale": "en-US",
+  "timezone": "UTC",
+  "themes": ["light", "dark"],
+  "redaction": {
+    "replacement_email_domain": "example.test",
+    "forbidden_text": [
+      "access_token",
+      "refresh_token",
+      "macro_id_token",
+      "authorization: bearer"
+    ]
+  },
+  "captures": [
+    {
+      "surface": "documents",
+      "state": "populated",
+      "route": "/component/documents",
+      "wait_selector": "[data-list-view=\"documents\"] [data-soup-list-container]",
+      "expected_selector": "[data-entity-id=\"00000000-0000-0000-0002-000000000001\"]",
+      "expected_text": "Project Roadmap"
+    },
+    {
+      "surface": "search",
+      "state": "populated",
+      "route": "/component/search",
+      "wait_selector": "[data-list-view=\"search\"] [data-soup-list-container]",
+      "setup": {
+        "kind": "search",
+        "query": "Project Roadmap"
+      },
+      "expected_selector": "[data-entity-id=\"00000000-0000-0000-0002-000000000001\"]",
+      "expected_text": "Project Roadmap"
+    },
+    {
+      "surface": "channels",
+      "state": "populated",
+      "route": "/component/channels",
+      "wait_selector": "[data-list-view=\"channels\"] [data-soup-list-container]",
+      "expected_selector": "[data-entity-id=\"00000000-0000-0000-0000-000000000001\"]",
+      "expected_text": "general"
+    },
+    {
+      "surface": "channels",
+      "state": "thread_target",
+      "route": "/channel/00000000-0000-0000-0000-000000000001?channel_message_id=00000000-0000-0000-0003-000000000006",
+      "wait_selector": "[data-split-container]",
+      "expected_text": "Deep thread target reply"
+    }
+  ]
+}

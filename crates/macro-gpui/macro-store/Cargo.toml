@@ -1,0 +1,20 @@
+[package]
+name = "macro_store"
+version = "0.1.0"
+edition.workspace = true
+license = "AGPL-3.0-only"
+
+[lib]
+path = "src/macro_store.rs"
+
+[lints]
+workspace = true
+
+[dependencies]
+anyhow.workspace = true
+ring = "0.17.14"
+sqlez.workspace = true
+
+[dev-dependencies]
+futures.workspace = true
+tempfile.workspace = true

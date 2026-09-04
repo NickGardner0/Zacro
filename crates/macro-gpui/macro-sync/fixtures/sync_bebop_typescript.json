@@ -1,0 +1,18 @@
+{
+  "schema": "macro.sync-service.bebop.typescript.v1",
+  "macro_revision": "7324c6adaee90070e64bcabf3c0d77600c96db71",
+  "generator": "services/sync-service/bebop/generated/schema.ts (bebopc 3.1.3)",
+  "frames": {
+    "peer_update": "17000000010200000002000000aabb01000000cc040000006f702d31",
+    "peer_awareness": "070000000203000000010203",
+    "peer_request_since": "0600000003020000000405",
+    "peer_request_snapshot": "0000000004",
+    "peer_register_id": "08000000052a00000000000000",
+    "remote_initial_sync": "0b000000010200000001020100000003",
+    "remote_update": "05000000020100000004",
+    "remote_awareness": "05000000030100000005",
+    "remote_snapshot": "0600000004020000000607",
+    "remote_update_ack": "070000000503000000616263",
+    "remote_update_since": "0b00000006010000000802000000090a"
+  }
+}

@@ -1,0 +1,89 @@
+{
+  "schema": "macro.gpui.parity-release-gates.v1",
+  "source_revisions": {
+    "macro": "7324c6adaee90070e64bcabf3c0d77600c96db71",
+    "zed": "f66ed399cdde86092af8af3dc7b418abf45f37f8"
+  },
+  "local_gates": [
+    {
+      "id": "native-test-matrix",
+      "status": "passed",
+      "command": "cargo test -p macro_api -p macro_app -p macro_canvas -p macro_editor -p macro_entity -p macro_layout -p macro_list -p macro_metrics -p macro_models -p macro_realtime -p macro_store -p macro_sync -p macro_theme -p macro_updater -p macro_parity -p macro_ui -p livekit_client --lib"
+    },
+    {
+      "id": "browser-native-collaboration",
+      "status": "passed",
+      "command": "cd crates/macro-gpui/macro-sync/fixtures && npm ci --ignore-scripts --no-audit --no-fund && node verify_markdown_two_client.mjs"
+    },
+    {
+      "id": "gpui-visual-accessibility-matrix",
+      "status": "passed",
+      "command": "python3 crates/macro-gpui/scripts/capture-gpui-fixtures.py",
+      "expected_captures": 234
+    },
+    {
+      "id": "large-data-performance-soak",
+      "status": "passed",
+      "command": "cargo run -p macro_parity --bin macro_performance_soak",
+      "aggregate_budget_ms": 12000
+    },
+    {
+      "id": "release-input-to-present-latency",
+      "status": "passed",
+      "command": "python3 crates/macro-gpui/scripts/measure-gpui-interactions.py",
+      "p95_budget_ms": 50
+    },
+    {
+      "id": "configured-adhoc-bundle",
+      "status": "passed",
+      "command": "MACRO_VERSION=1.2.3 MACRO_BUILD_NUMBER=42 MACRO_TEAM_IDENTIFIER=ABCD123456 MACRO_UPDATE_BASE_URL=https://updates.example.test/macro crates/macro-gpui/scripts/bundle-macos.sh debug"
+    }
+  ],
+  "external_gates": [
+    {
+      "id": "solid-reference-captures",
+      "status": "environment_required",
+      "blocks": ["M0.fixture-goldens", "M12.parity-closure"],
+      "required_inputs": ["nix", "docker", "Macro seeded local E2E stack"],
+      "command": "python3 crates/macro-gpui/scripts/capture-solid-reference.py --macro-root /path/to/pinned/macro"
+    },
+    {
+      "id": "macro-local-stack-contract-suite",
+      "status": "environment_required",
+      "blocks": ["M12.parity-closure"],
+      "required_inputs": ["nix", "docker", "Macro seeded local E2E stack"],
+      "command": "crates/macro-gpui/scripts/test-local-stack.sh /path/to/pinned/macro"
+    },
+    {
+      "id": "live-native-web-collaboration",
+      "status": "environment_required",
+      "blocks": ["M12.parity-closure"],
+      "required_inputs": ["two authenticated fixture clients", "Macro sync service"]
+    },
+    {
+      "id": "voiceover-and-multilingual-ime",
+      "status": "manual_review_required",
+      "blocks": ["M12.accessibility-security", "M12.parity-closure"],
+      "required_inputs": ["macOS VoiceOver", "representative input methods", "human assistive-technology review"]
+    },
+    {
+      "id": "distribution-security-review",
+      "status": "manual_review_required",
+      "blocks": ["M12.accessibility-security", "M12.parity-closure"],
+      "required_inputs": ["authorized security reviewer", "production threat model"]
+    },
+    {
+      "id": "developer-id-sign-and-notarize",
+      "status": "credentials_required",
+      "blocks": ["M12.packaging-signing-updates", "M12.parity-closure"],
+      "required_inputs": ["Apple Developer ID certificate", "Apple notarization credentials", "production update origin"],
+      "command": "Run the protected signed-notarized-release-macos workflow_dispatch job"
+    },
+    {
+      "id": "agpl-gpl-distribution-review",
+      "status": "legal_review_required",
+      "blocks": ["M0.license-review", "M12.parity-closure"],
+      "required_inputs": ["authorized legal counsel", "source and notice delivery decision"]
+    }
+  ]
+}

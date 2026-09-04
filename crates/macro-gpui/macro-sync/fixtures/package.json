@@ -1,0 +1,7 @@
+{
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "loro-crdt": "1.13.7"
+  }
+}
