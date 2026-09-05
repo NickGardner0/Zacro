@@ -293,7 +293,7 @@ impl RenderOnce for Sidebar {
                             .justify_center()
                             .text_color(colors.ink)
                             .text_xs()
-                            .child("M"),
+                            .child("Z"),
                     )
                     .when(self.expanded, |this| {
                         this.child(
@@ -303,7 +303,7 @@ impl RenderOnce for Sidebar {
                                 .text_sm()
                                 .font_weight(FontWeight::MEDIUM)
                                 .text_color(colors.ink)
-                                .child("Macro"),
+                                .child("Zacro"),
                         )
                     }),
             )
@@ -1035,7 +1035,7 @@ impl RenderOnce for AppLayout {
         v_flex()
             .id("macro-workspace")
             .role(Role::Application)
-            .aria_label("Macro")
+            .aria_label("Zacro")
             .w_full()
             .h_full()
             .bg(colors.background)

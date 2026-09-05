@@ -100,7 +100,7 @@ use serde::{Deserialize, Serialize};
 use session::*;
 use std::cell::RefCell;
 use std::collections::{BTreeMap, HashMap, HashSet};
-use std::io::Read as _;
+use std::io::{BufRead as _, Read as _, Write as _};
 use std::path::PathBuf;
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::{Arc, Mutex};
@@ -8097,7 +8097,7 @@ impl MacroApp {
                             let account_bytes = serde_json::to_vec(&credentials)?;
                             let persist = cx
                                 .update(move |cx| {
-                                    cx.write_credentials(&account_key, "Macro", &account_bytes)
+                                    cx.write_credentials(&account_key, "Zacro", &account_bytes)
                                 })
                                 .await;
                             this.update(cx, |this, cx| {
@@ -8154,7 +8154,7 @@ impl MacroApp {
                                 let persist_key = account_credentials_key(&user.user_id);
                                 let persist = cx
                                     .update(move |cx| {
-                                        cx.write_credentials(&persist_key, "Macro", &bytes)
+                                        cx.write_credentials(&persist_key, "Zacro", &bytes)
                                     })
                                     .await;
                                 Ok::<_, anyhow::Error>((
@@ -8283,20 +8283,69 @@ impl MacroApp {
                         this.session = SessionState::AwaitingCode { email };
                     }
                     Ok(PasswordlessLoginResponse::SsoRequired(sso)) => {
-                        let url = format!(
-                            "{}/login/sso?idp_id={}&login_hint={}&is_mobile=true&original_url={}",
-                            api.config().auth_base_url,
-                            urlencoding::encode(&sso.idp_id),
-                            urlencoding::encode(&email),
-                            urlencoding::encode("macro://login")
-                        );
-                        this.session = if let Some(url) = safe_external_resource_url(&url) {
-                            SessionState::SsoRequired { email, url }
-                        } else {
-                            SessionState::Failed {
-                                message: "The identity provider returned an unsafe sign-in URL."
-                                    .into(),
+                        this.session = match start_zacro_loopback_callback("/zacro/login") {
+                            Ok(callback) => {
+                                let url = format!(
+                                    "{}/login/sso?idp_id={}&login_hint={}&is_mobile=true&original_url={}",
+                                    api.config().auth_base_url,
+                                    urlencoding::encode(&sso.idp_id),
+                                    urlencoding::encode(&email),
+                                    urlencoding::encode(&callback.redirect_uri)
+                                );
+                                if let Some(url) = safe_external_resource_url(&url) {
+                                    let callback_auth_account_id = auth_account_id.clone();
+                                    cx.spawn(async move |this, cx| {
+                                        let result = match callback.receiver.await {
+                                            Ok(result) => result.and_then(|url| {
+                                                zacro_callback_query_value(&url, &["token"])
+                                                    .ok_or_else(|| {
+                                                        anyhow::anyhow!(
+                                                            "browser sign-in callback did not contain a session code"
+                                                        )
+                                                    })
+                                            }),
+                                            Err(_) => Err(anyhow::anyhow!(
+                                                "local sign-in callback closed unexpectedly"
+                                            )),
+                                        };
+                                        this.update(cx, |this, cx| {
+                                            if !this.auth_transition_is_current(
+                                                auth_generation,
+                                                callback_auth_account_id.as_deref(),
+                                            ) {
+                                                return;
+                                            }
+                                            match result {
+                                                Ok(session_code) => {
+                                                    this.complete_sso_login(session_code, cx)
+                                                }
+                                                Err(error) => {
+                                                    this.session = SessionState::Failed {
+                                                        message: format!(
+                                                            "Browser sign-in could not be completed: {error}"
+                                                        ),
+                                                    };
+                                                    cx.notify();
+                                                }
+                                            }
+                                        })?;
+                                        anyhow::Ok(())
+                                    })
+                                    .detach();
+                                    SessionState::SsoRequired { email, url }
+                                } else {
+                                    SessionState::Failed {
+                                        message:
+                                            "The identity provider returned an unsafe sign-in URL."
+                                                .into(),
+                                    }
+                                }
                             }
+                            Err(error) => SessionState::Failed {
+                                message: format!(
+                                    "Zacro could not prepare the secure browser callback: {error}"
+                                ),
+                            },
                         };
                     }
                     Err(error) => {
@@ -8346,7 +8395,7 @@ impl MacroApp {
                 let bytes = serde_json::to_vec(&stored)?;
                 let credential_key = account_credentials_key(&user.user_id);
                 let persist = cx
-                    .update(move |cx| cx.write_credentials(&credential_key, "Macro", &bytes))
+                    .update(move |cx| cx.write_credentials(&credential_key, "Zacro", &bytes))
                     .await;
                 Ok::<_, anyhow::Error>((user, email, macro_api_token, persist))
             }
@@ -8614,7 +8663,7 @@ impl MacroApp {
                 let bytes = serde_json::to_vec(&stored)?;
                 let credential_key = account_credentials_key(&user.user_id);
                 let persist = cx
-                    .update(move |cx| cx.write_credentials(&credential_key, "Macro", &bytes))
+                    .update(move |cx| cx.write_credentials(&credential_key, "Zacro", &bytes))
                     .await;
                 Ok::<_, anyhow::Error>((user, email, macro_api_token, persist))
             }
@@ -9094,7 +9143,7 @@ impl MacroApp {
                     let macro_api_token = updated.macro_api_token.clone();
                     let bytes = serde_json::to_vec(&updated)?;
                     let write_key = credential_key.clone();
-                    cx.update(move |cx| cx.write_credentials(&write_key, "Macro", &bytes))
+                    cx.update(move |cx| cx.write_credentials(&write_key, "Zacro", &bytes))
                         .await?;
                     anyhow::Ok((user, macro_api_token))
                 }
@@ -9673,7 +9722,7 @@ impl MacroApp {
         let state = self.list_query_state(view_id);
         match state.to_deep_link_value() {
             Ok(value) => {
-                let url = format!("macro:///component/{view_id}?view={value}");
+                let url = format!("zacro:///component/{view_id}?view={value}");
                 cx.write_to_clipboard(ClipboardItem::new_string(url));
                 self.session_notice = Some("Copied this list view's Macro link".into());
             }
@@ -10153,7 +10202,7 @@ impl MacroApp {
         self.notification_routes
             .insert(notification_id.clone(), notification);
         cx.show_system_notification(SystemNotification {
-            tag: format!("macro-notification:{notification_id}").into(),
+            tag: format!("zacro-notification:{notification_id}").into(),
             title: title.into(),
             body: body.into(),
             actions: vec![
@@ -10197,7 +10246,7 @@ impl MacroApp {
                 NotificationMutation::Done(true),
                 cx,
             );
-            cx.dismiss_system_notification(&format!("macro-notification:{}", notification.id));
+            cx.dismiss_system_notification(&format!("zacro-notification:{}", notification.id));
             return;
         }
 
@@ -10207,7 +10256,7 @@ impl MacroApp {
             cx,
         );
         self.open_notification_entity(&notification, cx);
-        cx.dismiss_system_notification(&format!("macro-notification:{}", notification.id));
+        cx.dismiss_system_notification(&format!("zacro-notification:{}", notification.id));
     }
 
     fn open_notification_entity(
@@ -10556,7 +10605,7 @@ impl MacroApp {
                     .map(|user_id| self.user_display_name(user_id, "Someone"))
                     .unwrap_or_else(|| "Someone".into());
                 cx.show_system_notification(SystemNotification {
-                    tag: format!("macro-call:{call_id}").into(),
+                    tag: format!("zacro-call:{call_id}").into(),
                     title: format!("Incoming call in {channel_name}").into(),
                     body: format!("{caller} started a call").into(),
                     actions: vec![
@@ -10579,7 +10628,7 @@ impl MacroApp {
                     .is_some_and(|call| call.call_id == call_id)
                 {
                     self.incoming_call = None;
-                    cx.dismiss_system_notification(&format!("macro-call:{call_id}"));
+                    cx.dismiss_system_notification(&format!("zacro-call:{call_id}"));
                 }
                 if self.layout_state.active_section == NavSection::Calls {
                     self.load_filtered_list_view(self.call_list_tab.view_id().into(), false, cx);
@@ -10592,7 +10641,7 @@ impl MacroApp {
                     .is_some_and(|call| call.call_id == call_id)
                 {
                     self.incoming_call = None;
-                    cx.dismiss_system_notification(&format!("macro-call:{call_id}"));
+                    cx.dismiss_system_notification(&format!("zacro-call:{call_id}"));
                 }
             }
             CallEvent::ShareWithTeamToggled {
@@ -10935,7 +10984,7 @@ impl MacroApp {
                                 .is_some_and(|call| call.call_id == call_id)
                             {
                                 this.incoming_call = None;
-                                cx.dismiss_system_notification(&format!("macro-call:{call_id}"));
+                                cx.dismiss_system_notification(&format!("zacro-call:{call_id}"));
                                 cx.notify();
                             }
                         })?;
@@ -10965,11 +11014,11 @@ impl MacroApp {
             .filter(|call| call.call_id == call_id)
             .cloned()
         else {
-            cx.dismiss_system_notification(&format!("macro-call:{call_id}"));
+            cx.dismiss_system_notification(&format!("zacro-call:{call_id}"));
             return;
         };
         self.incoming_call = None;
-        cx.dismiss_system_notification(&format!("macro-call:{call_id}"));
+        cx.dismiss_system_notification(&format!("zacro-call:{call_id}"));
         if action_id != Some("decline") {
             self.join_native_call(incoming.channel_id, cx);
         }
@@ -10994,7 +11043,7 @@ impl MacroApp {
             .incoming_call
             .take_if(|incoming| incoming.channel_id == channel_id)
         {
-            cx.dismiss_system_notification(&format!("macro-call:{}", incoming.call_id));
+            cx.dismiss_system_notification(&format!("zacro-call:{}", incoming.call_id));
         }
         self.call_generation = self.call_generation.wrapping_add(1);
         let generation = self.call_generation;
@@ -23046,7 +23095,7 @@ impl MacroApp {
 
     fn initialize_sync_persistence(&mut self, cx: &mut Context<Self>) {
         let database_directory = paths::database_dir().clone();
-        let database_path = database_directory.join("macro-gpui-sync.sqlite");
+        let database_path = database_directory.join("zacro-sync.sqlite");
         cx.spawn(async move |this, cx| {
             let result = async {
                 std::fs::create_dir_all(&database_directory)
@@ -23078,7 +23127,7 @@ impl MacroApp {
 
     fn initialize_mutation_persistence(&mut self, cx: &mut Context<Self>) {
         let database_directory = paths::database_dir().clone();
-        let database_path = database_directory.join("macro-gpui-outbox.sqlite");
+        let database_path = database_directory.join("zacro-outbox.sqlite");
         let credential_key = format!("{}#mutation-outbox-key-v1", credentials_key());
         cx.spawn(async move |this, cx| {
             let result = async {
@@ -23092,7 +23141,7 @@ impl MacroApp {
                         let key = generate_mutation_encryption_key()?;
                         let write_key = credential_key.clone();
                         let bytes = key.to_vec();
-                        cx.update(move |cx| cx.write_credentials(&write_key, "Macro", &bytes))
+                        cx.update(move |cx| cx.write_credentials(&write_key, "Zacro", &bytes))
                             .await?;
                         key
                     }
@@ -30360,30 +30409,55 @@ impl MacroApp {
     }
 
     fn start_gmail_link(&mut self, scopes: &'static str, cx: &mut Context<Self>) {
+        let callback = match start_zacro_loopback_callback("/zacro/inbox-link-callback") {
+            Ok(callback) => callback,
+            Err(error) => {
+                self.session_notice = Some(format!(
+                    "Could not prepare the secure Gmail callback: {error}"
+                ));
+                cx.notify();
+                return;
+            }
+        };
         let api = self.api.clone();
-        // Macro's authentication service explicitly allows this native handoff.
-        // The browser redirects into the registered application scheme after
-        // Google consent, where `handle_open_urls` refreshes the linked inboxes.
-        let callback = "macro://inbox-link-callback";
         self.session_notice = Some("Preparing Google authorization…".into());
         cx.spawn(async move |this, cx| {
-            let result = api.init_gmail_link(callback, scopes).await;
-            this.update(cx, |this, cx| {
-                match result {
-                    Ok(response) => {
-                        this.open_safe_external_url(
-                            &response.authorization_url,
-                            "Finish Google consent in the browser; Macro will reopen automatically"
-                                .to_owned(),
-                            "Google authorization",
-                            cx,
-                        );
-                    }
-                    Err(error) => {
+            let response = match api.init_gmail_link(&callback.redirect_uri, scopes).await {
+                Ok(response) => response,
+                Err(error) => {
+                    this.update(cx, |this, cx| {
                         this.session_notice = Some(format!("Could not connect Gmail: {error}"));
-                    }
+                        cx.notify();
+                    })?;
+                    return anyhow::Ok(());
                 }
+            };
+            this.update(cx, |this, cx| {
+                this.open_safe_external_url(
+                    &response.authorization_url,
+                    "Finish Google consent in the browser, then return to Zacro".to_owned(),
+                    "Google authorization",
+                    cx,
+                );
                 cx.notify();
+            })?;
+
+            let result = match callback.receiver.await {
+                Ok(result) => result.and_then(|url| {
+                    zacro_callback_query_value(&url, &["link_id", "token"]).ok_or_else(|| {
+                        anyhow::anyhow!("Gmail callback did not contain a link identifier")
+                    })
+                }),
+                Err(_) => Err(anyhow::anyhow!("local Gmail callback closed unexpectedly")),
+            };
+            this.update(cx, |this, cx| match result {
+                Ok(link_id) => this.complete_email_link(link_id, false, cx),
+                Err(error) => {
+                    this.session_notice = Some(format!(
+                        "Gmail authorization could not be completed: {error}"
+                    ));
+                    cx.notify();
+                }
             })?;
             anyhow::Ok(())
         })
@@ -30661,8 +30735,17 @@ impl MacroApp {
     }
 
     fn start_github_connect(&mut self, reconnect: bool, cx: &mut Context<Self>) {
+        let callback = match start_zacro_loopback_callback("/zacro/github-link-callback") {
+            Ok(callback) => callback,
+            Err(error) => {
+                self.session_notice = Some(format!(
+                    "Could not prepare the secure GitHub callback: {error}"
+                ));
+                cx.notify();
+                return;
+            }
+        };
         let api = self.api.clone();
-        let original_url = "macro://github-link-callback";
         self.session_notice = Some(if reconnect {
             "Preparing GitHub reconnection…".into()
         } else {
@@ -30673,26 +30756,45 @@ impl MacroApp {
                 if reconnect {
                     api.delete_github_link().await?;
                 }
-                api.init_github_link(Some(original_url)).await
+                api.init_github_link(Some(&callback.redirect_uri)).await
             }
             .await;
-            this.update(cx, |this, cx| {
-                match result {
-                    Ok(response) => {
-                        this.open_safe_external_url(
-                            &response.authorization_url,
-                            "Finish GitHub authorization in the browser; Macro will reopen automatically"
-                                .to_owned(),
-                            "GitHub authorization",
-                            cx,
-                        );
-                    }
-                    Err(error) => {
+            let response = match result {
+                Ok(response) => response,
+                Err(error) => {
+                    this.update(cx, |this, cx| {
                         this.session_notice =
                             Some(format!("Could not start GitHub connection: {error}"));
-                    }
+                        cx.notify();
+                    })?;
+                    return anyhow::Ok(());
                 }
+            };
+            this.update(cx, |this, cx| {
+                this.open_safe_external_url(
+                    &response.authorization_url,
+                    "Finish GitHub authorization in the browser, then return to Zacro".to_owned(),
+                    "GitHub authorization",
+                    cx,
+                );
                 cx.notify();
+            })?;
+
+            let result = match callback.receiver.await {
+                Ok(result) => result,
+                Err(_) => Err(anyhow::anyhow!("local GitHub callback closed unexpectedly")),
+            };
+            this.update(cx, |this, cx| match result {
+                Ok(_) => {
+                    this.session_notice =
+                        Some("GitHub authorization completed; refreshing connection…".into());
+                    this.load_developer_integrations(true, cx);
+                }
+                Err(error) => {
+                    this.session_notice = Some(format!(
+                        "GitHub authorization could not be completed: {error}"
+                    ));
+                }
             })?;
             anyhow::Ok(())
         })
@@ -30958,7 +31060,7 @@ impl MacroApp {
         let title = if show_code {
             "Check your email"
         } else {
-            "Sign in to Macro"
+            "Sign in to Zacro"
         };
         let description = if show_code {
             "Enter the one-time code to connect this native client."
@@ -31002,7 +31104,7 @@ impl MacroApp {
                             .justify_center()
                             .font_weight(FontWeight::BOLD)
                             .text_color(colors.ink)
-                            .child("M"),
+                            .child("Z"),
                     )
                     .child(
                         v_flex()
@@ -36714,7 +36816,7 @@ impl Render for MacroApp {
         let root = div()
             .id("macro-app")
             .role(Role::Application)
-            .aria_label("Macro")
+            .aria_label("Zacro")
             .key_context("MacroApp")
             .track_focus(&self.focus_handle)
             .size_full()
@@ -57297,7 +57399,7 @@ impl MacroApp {
     fn check_and_install_update(&mut self, cx: &mut Context<Self>) {
         let Some(installer) = self.update_installer.clone() else {
             self.update_state = AppUpdateState::Failed(
-                "The updater is only available from an installed Macro.app bundle.".into(),
+                "The updater is only available from an installed Zacro.app bundle.".into(),
             );
             cx.notify();
             return;
@@ -58384,7 +58486,7 @@ fn compiled_update_team_identifier() -> Option<String> {
 }
 
 fn preferences_path() -> std::path::PathBuf {
-    paths::config_dir().join("macro-gpui/preferences.json")
+    paths::config_dir().join("zacro/preferences.json")
 }
 
 fn account_credentials_key(user_id: &str) -> String {
@@ -62127,6 +62229,164 @@ fn email_thread_share_update_request(
 const MAX_MACRO_DEEP_LINK_BYTES: usize = 16 * 1024;
 const MAX_DEEP_LINK_IDENTIFIER_BYTES: usize = 2 * 1024;
 const MAX_DEEP_LINK_TOKEN_BYTES: usize = 8 * 1024;
+const ZACRO_CALLBACK_STATE_PARAM: &str = "zacro_state";
+
+struct ZacroLoopbackCallback {
+    redirect_uri: String,
+    receiver: futures::channel::oneshot::Receiver<anyhow::Result<url::Url>>,
+}
+
+fn start_zacro_loopback_callback(path: &'static str) -> anyhow::Result<ZacroLoopbackCallback> {
+    let listener = std::net::TcpListener::bind(("127.0.0.1", 0))
+        .context("could not reserve a local browser callback port")?;
+    listener
+        .set_nonblocking(true)
+        .context("could not configure the local browser callback")?;
+    let port = listener
+        .local_addr()
+        .context("could not inspect the local browser callback")?
+        .port();
+    let state = uuid::Uuid::new_v4().to_string();
+    let mut callback_url = url::Url::parse(&format!("http://localhost:{port}{path}"))?;
+    callback_url
+        .query_pairs_mut()
+        .append_pair(ZACRO_CALLBACK_STATE_PARAM, &state);
+    let redirect_uri = callback_url.to_string();
+    let (sender, receiver) = futures::channel::oneshot::channel();
+
+    std::thread::spawn(move || {
+        let deadline = std::time::Instant::now() + Duration::from_secs(5 * 60);
+        loop {
+            if sender.is_canceled() {
+                return;
+            }
+            if std::time::Instant::now() >= deadline {
+                let _ = sender.send(Err(anyhow::anyhow!(
+                    "browser authorization timed out before Zacro received the callback"
+                )));
+                return;
+            }
+
+            let (mut stream, peer) = match listener.accept() {
+                Ok(connection) => connection,
+                Err(error) if error.kind() == std::io::ErrorKind::WouldBlock => {
+                    std::thread::sleep(Duration::from_millis(50));
+                    continue;
+                }
+                Err(error) => {
+                    let _ = sender.send(Err(error).context("local browser callback failed"));
+                    return;
+                }
+            };
+            if !peer.ip().is_loopback() {
+                continue;
+            }
+            let _ = stream.set_read_timeout(Some(Duration::from_secs(2)));
+            let request_target = {
+                let mut reader = std::io::BufReader::new(&stream);
+                let mut request_line = String::new();
+                match reader.read_line(&mut request_line) {
+                    Ok(bytes) if bytes > 0 && request_line.len() <= MAX_MACRO_DEEP_LINK_BYTES => {
+                        request_line
+                            .split_ascii_whitespace()
+                            .collect::<Vec<_>>()
+                            .as_slice()
+                            .get(1)
+                            .map(|target| (*target).to_owned())
+                    }
+                    _ => None,
+                }
+            };
+            let Some(request_target) = request_target else {
+                write_zacro_callback_response(
+                    &mut stream,
+                    400,
+                    "Authorization failed",
+                    "Zacro could not read this browser callback. Return to the app and try again.",
+                    true,
+                );
+                continue;
+            };
+            match parse_zacro_loopback_callback_target(&request_target, path, &state) {
+                Ok(url) => {
+                    write_zacro_callback_response(
+                        &mut stream,
+                        200,
+                        "Authorization complete",
+                        "You can close this tab and return to Zacro.",
+                        false,
+                    );
+                    let _ = sender.send(Ok(url));
+                    return;
+                }
+                Err(_) => {
+                    write_zacro_callback_response(
+                        &mut stream,
+                        400,
+                        "Authorization failed",
+                        "This callback was not requested by Zacro. Return to the app and try again.",
+                        true,
+                    );
+                }
+            }
+        }
+    });
+
+    Ok(ZacroLoopbackCallback {
+        redirect_uri,
+        receiver,
+    })
+}
+
+fn parse_zacro_loopback_callback_target(
+    request_target: &str,
+    expected_path: &str,
+    expected_state: &str,
+) -> anyhow::Result<url::Url> {
+    let url = if request_target.starts_with("http://") {
+        url::Url::parse(request_target)?
+    } else {
+        url::Url::parse(&format!("http://localhost{request_target}"))?
+    };
+    if url.scheme() != "http" || url.host_str() != Some("localhost") || url.path() != expected_path
+    {
+        anyhow::bail!("unexpected Zacro browser callback destination");
+    }
+    let state = url
+        .query_pairs()
+        .find_map(|(key, value)| (key == ZACRO_CALLBACK_STATE_PARAM).then(|| value.into_owned()))
+        .ok_or_else(|| anyhow::anyhow!("Zacro browser callback is missing state"))?;
+    if state != expected_state {
+        anyhow::bail!("Zacro browser callback state did not match");
+    }
+    Ok(url)
+}
+
+fn zacro_callback_query_value(url: &url::Url, names: &[&str]) -> Option<String> {
+    url.query_pairs()
+        .find_map(|(key, value)| names.contains(&key.as_ref()).then(|| value.into_owned()))
+}
+
+fn write_zacro_callback_response(
+    stream: &mut std::net::TcpStream,
+    status: u16,
+    title: &str,
+    message: &str,
+    is_error: bool,
+) {
+    let icon = if is_error { "&#10005;" } else { "&#10003;" };
+    let accent = if is_error { "#ef4444" } else { "#22c55e" };
+    let body = format!(
+        "<!doctype html><html><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width\"><title>{title} — Zacro</title><style>body{{margin:0;min-height:100vh;display:grid;place-items:center;background:#18181b;color:#e4e4e7;font:15px -apple-system,BlinkMacSystemFont,Segoe UI,sans-serif}}main{{width:min(400px,calc(100vw - 48px));padding:32px;border:1px solid #3f3f46;border-radius:12px;background:#27272a;text-align:center;box-shadow:0 20px 60px #0006}}i{{display:grid;place-items:center;width:44px;height:44px;margin:0 auto 18px;border-radius:50%;background:{accent};color:#18181b;font-size:24px;font-style:normal;font-weight:700}}h1{{margin:0 0 10px;font-size:20px}}p{{margin:0;color:#a1a1aa;line-height:1.55}}</style></head><body><main><i>{icon}</i><h1>{title}</h1><p>{message}</p></main></body></html>"
+    );
+    let reason = if status == 200 { "OK" } else { "Bad Request" };
+    let response = format!(
+        "HTTP/1.1 {status} {reason}\r\nContent-Type: text/html; charset=utf-8\r\nContent-Length: {}\r\nCache-Control: no-store\r\nConnection: close\r\n\r\n{body}",
+        body.len()
+    );
+    let _ = stream.write_all(response.as_bytes());
+    let _ = stream.flush();
+}
 
 fn parse_macro_deep_link(raw: &str) -> Option<MacroDeepLink> {
     if raw.len() > MAX_MACRO_DEEP_LINK_BYTES || raw.chars().any(char::is_control) {
@@ -62135,7 +62395,7 @@ fn parse_macro_deep_link(raw: &str) -> Option<MacroDeepLink> {
     let url = url::Url::parse(raw).ok()?;
     let mut segments = Vec::<String>::new();
     match url.scheme() {
-        "macro" => {
+        "zacro" => {
             if let Some(host) = url.host_str().filter(|host| !host.is_empty()) {
                 segments.push(host.to_owned());
             }
@@ -62298,7 +62558,7 @@ fn channel_invite_url(environment: &str, join_code: &str) -> String {
 
 fn channel_message_deep_link(channel_id: &str, message_id: &str) -> String {
     format!(
-        "macro:///channel/{}?message={}",
+        "zacro:///channel/{}?message={}",
         urlencoding::encode(channel_id),
         urlencoding::encode(message_id)
     )
@@ -68771,7 +69031,7 @@ pub fn run_macro_visual_test_runner() -> anyhow::Result<()> {
         audio::init(cx);
         theme_settings::init(theme::LoadThemes::All(Box::new(assets::Assets)), cx);
         macro_theme::apply_zed_theme(if dark { "One Dark" } else { "One Light" }, cx);
-        cx.set_app_identity("com.macro.desktop.gpui.visual", "Macro Visual Fixture");
+        cx.set_app_identity("com.nickgardner.zacro.visual", "Zacro Visual Fixture");
         cx.bind_keys(macro_key_bindings(&HashMap::new()));
         anyhow::Ok(())
     })?;
@@ -69049,7 +69309,7 @@ struct MacroCrashHandler(Arc<crashes::Client>);
 impl Global for MacroCrashHandler {}
 
 fn macro_crash_logs_dir() -> PathBuf {
-    paths::logs_dir().join("macro-gpui/crashes")
+    paths::logs_dir().join("zacro/crashes")
 }
 
 fn crash_handler_socket_argument() -> Option<PathBuf> {
@@ -69083,7 +69343,7 @@ pub fn run_macro_app() {
             Ok(LaunchRecovery::HealthCheckRequired { .. }) => Some(installer),
             Ok(LaunchRecovery::RolledBack { failed_version }) => {
                 eprintln!(
-                    "Macro {failed_version} did not pass its launch health check; restored the previous release"
+                    "Zacro {failed_version} did not pass its launch health check; restored the previous release"
                 );
                 #[cfg(target_os = "macos")]
                 {
@@ -69096,13 +69356,13 @@ pub fn run_macro_app() {
             }
             Ok(LaunchRecovery::NoPendingUpdate) => None,
             Err(error) => {
-                eprintln!("Macro update recovery could not be evaluated: {error:#}");
+                eprintln!("Zacro update recovery could not be evaluated: {error:#}");
                 None
             }
         },
         Ok(None) => None,
         Err(error) => {
-            eprintln!("Macro could not initialize update recovery: {error:#}");
+            eprintln!("Zacro could not initialize update recovery: {error:#}");
             None
         }
     };
@@ -69128,7 +69388,7 @@ pub fn run_macro_app() {
         let accessibility_preferences = load_app_preferences();
         cx.set_reduce_motion(accessibility_preferences.reduce_motion);
         macro_theme::set_high_contrast(accessibility_preferences.high_contrast, cx);
-        cx.set_app_identity("com.macro.desktop.gpui", "Macro");
+        cx.set_app_identity("com.nickgardner.zacro", "Zacro");
 
         if crash_reports_enabled {
             let logs_dir = macro_crash_logs_dir();
@@ -69138,7 +69398,7 @@ pub fn run_macro_app() {
                 crashes::InitCrashHandler {
                     session_id: uuid::Uuid::new_v4().to_string(),
                     zed_version: installed_version().into(),
-                    binary: "macro_app".into(),
+                    binary: "zacro".into(),
                     release_channel: configured_environment().1.into(),
                     commit_sha: option_env!("GIT_SHA").unwrap_or("unknown").into(),
                 },
@@ -69146,7 +69406,7 @@ pub fn run_macro_app() {
                     let executor = executor.clone();
                     move |task| executor.spawn(task).detach()
                 },
-                |pid| paths::temp_dir().join(format!("macro-gpui-crash-handler-{pid}")),
+                |pid| paths::temp_dir().join(format!("zacro-crash-handler-{pid}")),
                 {
                     let executor = executor.clone();
                     move |duration| executor.timer(duration)
@@ -69184,7 +69444,7 @@ pub fn run_macro_app() {
                 .spawn(async move {
                     executor.timer(Duration::from_secs(15)).await;
                     if let Err(error) = installer.confirm_launch() {
-                        eprintln!("Macro update health confirmation failed: {error:#}");
+                        eprintln!("Zacro update health confirmation failed: {error:#}");
                     }
                 })
                 .detach();
@@ -69194,13 +69454,13 @@ pub fn run_macro_app() {
             let window = window;
             move |response, cx| {
                 let action_id = response.action_id.as_deref();
-                if let Some(call_id) = response.tag.strip_prefix("macro-call:") {
+                if let Some(call_id) = response.tag.strip_prefix("zacro-call:") {
                     let _ = window.update(cx, |this, app_window, cx| {
                         app_window.activate_window();
                         this.handle_incoming_call_response(call_id, action_id, cx);
                     });
                 } else if let Some(notification_id) =
-                    response.tag.strip_prefix("macro-notification:")
+                    response.tag.strip_prefix("zacro-notification:")
                 {
                     let _ = window.update(cx, |this, app_window, cx| {
                         app_window.activate_window();
@@ -69270,16 +69530,17 @@ mod crm_view_tests {
         normalized_team_link_share, notification_block_type, notification_entity_input,
         notification_from_gateway_payload, notification_item_wire_type, onboarding_team_invites,
         parse_channel_composer_fields, parse_macro_deep_link, parse_mailto_url,
-        paywall_key_for_mutation, printable_document_html, project_content_item,
-        project_is_within_subtree, property_definition_has_options, property_definition_request,
-        property_definition_supports_multi, property_reference_for_mention_choice,
-        read_bounded_file, remove_channel_share_request, safe_download_filename,
-        safe_external_resource_url, scheduled_action_run_item, scroll_channel_thread_to_target,
-        section_resources, share_update_request, shortcut_is_valid, strip_ansi_sequences,
-        suggested_team_name, system_crm_stage_label, tag_editor_update_request, task_create_values,
-        task_effort_option_id, task_planning_dialog_values, task_planning_property_values,
-        team_update_request, toggle_property_token_value, user_name_label,
-        validated_email_schedule_time_at, write_app_preferences_atomically,
+        parse_zacro_loopback_callback_target, paywall_key_for_mutation, printable_document_html,
+        project_content_item, project_is_within_subtree, property_definition_has_options,
+        property_definition_request, property_definition_supports_multi,
+        property_reference_for_mention_choice, read_bounded_file, remove_channel_share_request,
+        safe_download_filename, safe_external_resource_url, scheduled_action_run_item,
+        scroll_channel_thread_to_target, section_resources, share_update_request,
+        shortcut_is_valid, strip_ansi_sequences, suggested_team_name, system_crm_stage_label,
+        tag_editor_update_request, task_create_values, task_effort_option_id,
+        task_planning_dialog_values, task_planning_property_values, team_update_request,
+        toggle_property_token_value, user_name_label, validated_email_schedule_time_at,
+        write_app_preferences_atomically, zacro_callback_query_value,
     };
     use crate::data::{ChannelAttachment, InboxItem};
     use gpui::{Modifiers, ScrollStrategy, UniformListScrollHandle};
@@ -69651,7 +69912,7 @@ mod crm_view_tests {
         let link = channel_message_deep_link("channel/launch", "reply+review");
         assert_eq!(
             link,
-            "macro:///channel/channel%2Flaunch?message=reply%2Breview"
+            "zacro:///channel/channel%2Flaunch?message=reply%2Breview"
         );
         assert_eq!(
             parse_macro_deep_link(&link),
@@ -70628,23 +70889,23 @@ mod crm_view_tests {
     #[test]
     fn macro_deep_links_accept_only_owned_callbacks_and_extract_session_code() {
         assert_eq!(
-            parse_macro_deep_link("macro://login?token=one%2Btime"),
+            parse_macro_deep_link("zacro://login?token=one%2Btime"),
             Some(MacroDeepLink::Login("one+time".into()))
         );
         assert_eq!(
-            parse_macro_deep_link("macro://inbox-link-callback"),
+            parse_macro_deep_link("zacro://inbox-link-callback"),
             Some(MacroDeepLink::Unsupported(
                 "inbox callback without link id".into()
             ))
         );
         assert_eq!(
-            parse_macro_deep_link("macro://inbox-link-callback?link_id=link%2D123&token=ignored"),
+            parse_macro_deep_link("zacro://inbox-link-callback?link_id=link%2D123&token=ignored"),
             Some(MacroDeepLink::InboxLinkCallback {
                 link_id: "link-123".into()
             })
         );
         assert_eq!(
-            parse_macro_deep_link("macro://login"),
+            parse_macro_deep_link("zacro://login"),
             Some(MacroDeepLink::Unsupported(
                 "login callback without session code".into()
             ))
@@ -70654,7 +70915,7 @@ mod crm_view_tests {
             None
         );
         assert_eq!(
-            parse_macro_deep_link("macro:///component/inbox/md/doc-1"),
+            parse_macro_deep_link("zacro:///component/inbox/md/doc-1"),
             Some(MacroDeepLink::Entity {
                 block_type: "md".into(),
                 entity_id: "doc-1".into(),
@@ -70676,7 +70937,7 @@ mod crm_view_tests {
             Some(MacroDeepLink::ChannelInvite("code/with+characters".into()))
         );
         assert_eq!(
-            parse_macro_deep_link("macro://channel-invite?code=join-code"),
+            parse_macro_deep_link("zacro://channel-invite?code=join-code"),
             Some(MacroDeepLink::ChannelInvite("join-code".into()))
         );
         assert_eq!(
@@ -70696,7 +70957,7 @@ mod crm_view_tests {
             })
         );
         assert_eq!(
-            parse_macro_deep_link("macro:///settings/appearance"),
+            parse_macro_deep_link("zacro:///settings/appearance"),
             Some(MacroDeepLink::Section(NavSection::Settings))
         );
         assert_eq!(
@@ -70709,7 +70970,7 @@ mod crm_view_tests {
         };
         let view = state.to_deep_link_value().unwrap();
         assert_eq!(
-            parse_macro_deep_link(&format!("macro:///component/tasks?view={view}")),
+            parse_macro_deep_link(&format!("zacro:///component/tasks?view={view}")),
             Some(MacroDeepLink::ListView {
                 section: NavSection::Tasks,
                 state,
@@ -70725,19 +70986,23 @@ mod crm_view_tests {
         );
         assert_eq!(
             parse_macro_deep_link(&format!(
-                "macro://login?token={}",
+                "zacro://login?token={}",
                 "x".repeat(MAX_DEEP_LINK_TOKEN_BYTES + 1)
             )),
             None
         );
         assert_eq!(
             parse_macro_deep_link(&format!(
-                "macro:///md/{}",
+                "zacro:///md/{}",
                 "x".repeat(MAX_DEEP_LINK_IDENTIFIER_BYTES + 1)
             )),
             None
         );
-        assert_eq!(parse_macro_deep_link("macro:///md/doc-1\nsecret"), None);
+        assert_eq!(parse_macro_deep_link("zacro:///md/doc-1\nsecret"), None);
+        assert_eq!(
+            parse_macro_deep_link("macro://login?token=official-macro-token"),
+            None
+        );
         assert_eq!(
             channel_invite_url("prod", "code/with+characters"),
             "https://macro.com/app/channel-invite?code=code%2Fwith%2Bcharacters"
@@ -70745,6 +71010,44 @@ mod crm_view_tests {
         assert_eq!(
             channel_invite_url("dev", "join-code"),
             "https://dev.macro.com/app/channel-invite?code=join-code"
+        );
+    }
+
+    #[test]
+    fn zacro_loopback_callbacks_require_the_private_path_and_state() {
+        let callback = parse_zacro_loopback_callback_target(
+            "/zacro/login?zacro_state=private-state&token=session%2Bcode",
+            "/zacro/login",
+            "private-state",
+        )
+        .unwrap();
+        assert_eq!(
+            zacro_callback_query_value(&callback, &["token"]),
+            Some("session+code".into())
+        );
+        assert!(
+            parse_zacro_loopback_callback_target(
+                "/zacro/login?zacro_state=wrong&token=session",
+                "/zacro/login",
+                "private-state",
+            )
+            .is_err()
+        );
+        assert!(
+            parse_zacro_loopback_callback_target(
+                "/zacro/inbox-link-callback?zacro_state=private-state&link_id=link-1",
+                "/zacro/login",
+                "private-state",
+            )
+            .is_err()
+        );
+        assert!(
+            parse_zacro_loopback_callback_target(
+                "http://evil.example/zacro/login?zacro_state=private-state&token=session",
+                "/zacro/login",
+                "private-state",
+            )
+            .is_err()
         );
     }
 

@@ -22,6 +22,7 @@ pub const SOLID_REFERENCE_PLAYWRIGHT_CONFIG: &str =
 pub const SOLID_REFERENCE_PLAYWRIGHT_SPEC: &str =
     include_str!("../../solid-reference/solid-reference.spec.ts");
 pub const MACRO_APP_SOURCE: &str = include_str!("../../macro-app/src/macro_app.rs");
+pub const SESSION_SOURCE: &str = include_str!("../../macro-app/src/session.rs");
 pub const EMBEDDED_VIDEO_SOURCE: &str = include_str!("../../macro-app/src/embedded_video.rs");
 pub const MACRO_API_SOURCE: &str = include_str!("../../macro-api/src/macro_api.rs");
 pub const MACRO_CANVAS_SOURCE: &str = include_str!("../../macro-canvas/src/macro_canvas.rs");
@@ -38,7 +39,7 @@ pub const MARKDOWN_TWO_CLIENT_FIXTURE: &str =
 pub const SYNC_FIXTURE_PACKAGE_LOCK: &str =
     include_str!("../../macro-sync/fixtures/package-lock.json");
 
-const BUNDLE_IDENTIFIER: &str = "com.macro.desktop.gpui";
+const BUNDLE_IDENTIFIER: &str = "com.nickgardner.zacro";
 
 pub fn validate() -> Result<(), String> {
     let baseline: Value = serde_json::from_str(BASELINE).map_err(|error| error.to_string())?;
@@ -221,6 +222,21 @@ pub fn validate() -> Result<(), String> {
     if !MACOS_INFO_PLIST.contains(&format!("<string>{BUNDLE_IDENTIFIER}</string>")) {
         return Err("macOS Info.plist does not use the stable bundle identifier".into());
     }
+    if !MACOS_INFO_PLIST.contains("<string>zacro</string>")
+        || MACOS_INFO_PLIST.contains("<string>macro</string>")
+    {
+        return Err("macOS bundle must claim only the isolated zacro URL scheme".into());
+    }
+    if !MACRO_APP_SOURCE.contains("\"zacro\" =>") || MACRO_APP_SOURCE.contains("\"macro\" =>") {
+        return Err("native deep links must not claim the official Macro URL scheme".into());
+    }
+    for session_namespace in ["zacro://session", "zacro-app://session"] {
+        if !SESSION_SOURCE.contains(session_namespace) {
+            return Err(format!(
+                "native credentials are missing isolated namespace {session_namespace}"
+            ));
+        }
+    }
     for localization_requirement in [
         "CFBundleDevelopmentRegion",
         "CFBundleLocalizations",
@@ -247,7 +263,7 @@ pub fn validate() -> Result<(), String> {
         "crashes::crash_server",
         "crashes::init",
         "crash_reports_enabled",
-        "macro-gpui/crashes",
+        "zacro/crashes",
     ] {
         if !MACRO_APP_SOURCE.contains(crash_requirement) {
             return Err(format!(
@@ -1243,6 +1259,18 @@ pub fn validate() -> Result<(), String> {
         "\\\"bundle_identifier\\\": \\\"{BUNDLE_IDENTIFIER}\\\""
     )) {
         return Err("macOS update manifest does not use the stable bundle identifier".into());
+    }
+    for packaging_requirement in [
+        "target/zacro",
+        "Zacro.app",
+        "Zacro-$version-macos.zip",
+        "target/$profile/zacro",
+    ] {
+        if !MACOS_BUNDLE_SCRIPT.contains(packaging_requirement) {
+            return Err(format!(
+                "macOS packaging is missing isolated Zacro identity: {packaging_requirement}"
+            ));
+        }
     }
     if !MACOS_BUNDLE_SCRIPT.contains("notarytool submit")
         || !MACOS_BUNDLE_SCRIPT.contains("stapler staple")

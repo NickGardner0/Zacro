@@ -1,3 +1,6 @@
+> [!IMPORTANT]
+> Remove this line to confirm you've reviewed this PR before submitting.
+
 # Zacro
 
 Zacro is an experimental native desktop client that rebuilds Macro's workspace
@@ -34,6 +37,17 @@ For a fair UI responsiveness test, use the optimized build:
 ```sh
 cargo run -p macro_app --release
 ```
+
+To build an isolated macOS application bundle:
+
+```sh
+crates/macro-gpui/scripts/bundle-macos.sh release
+open target/zacro/release/Zacro.app
+```
+
+The bundle is named `Zacro.app`, uses the identifier
+`com.nickgardner.zacro`, and handles only `zacro:` links. It does not register
+itself for the official Macro application's `macro:` authentication callbacks.
 
 Do not compare the first compilation or a fully unoptimized dependency graph
 with an installed production application. Judge responsiveness after the window

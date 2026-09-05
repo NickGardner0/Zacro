@@ -54,14 +54,14 @@ export MACRO_TEAM_IDENTIFIER="$team_identifier"
 cd "$repository_root"
 cargo build -p macro_app $cargo_args
 
-distribution_root="$repository_root/target/macro-gpui/$profile"
-bundle_root="$distribution_root/Macro.app"
-archive_path="$distribution_root/Macro-$version-macos.zip"
-executable_source="$repository_root/target/$profile/macro_app"
+distribution_root="$repository_root/target/zacro/$profile"
+bundle_root="$distribution_root/Zacro.app"
+archive_path="$distribution_root/Zacro-$version-macos.zip"
+executable_source="$repository_root/target/$profile/zacro"
 plist_source="$repository_root/crates/macro-gpui/macro-app/resources/macos/Info.plist"
 entitlements="$repository_root/crates/macro-gpui/macro-app/resources/macos/Macro.entitlements"
-staging_root=$(mktemp -d "${TMPDIR:-/tmp}/macro-gpui-bundle.XXXXXX")
-staging_bundle="$staging_root/Macro.app"
+staging_root=$(mktemp -d "${TMPDIR:-/tmp}/zacro-bundle.XXXXXX")
+staging_bundle="$staging_root/Zacro.app"
 contents="$staging_bundle/Contents"
 
 cleanup() {
@@ -70,9 +70,9 @@ cleanup() {
 trap cleanup EXIT HUP INT TERM
 
 mkdir -p "$contents/MacOS" "$contents/Resources"
-cp "$executable_source" "$contents/MacOS/Macro"
+cp "$executable_source" "$contents/MacOS/Zacro"
 cp "$plist_source" "$contents/Info.plist"
-chmod 755 "$contents/MacOS/Macro"
+chmod 755 "$contents/MacOS/Zacro"
 
 if command -v plutil >/dev/null 2>&1; then
   plutil -replace CFBundleShortVersionString -string "$version" "$contents/Info.plist"
@@ -97,7 +97,7 @@ if command -v codesign >/dev/null 2>&1; then
 fi
 
 mkdir -p "$distribution_root"
-backup_bundle="$distribution_root/.Macro.app.previous"
+backup_bundle="$distribution_root/.Zacro.app.previous"
 rm -rf "$backup_bundle"
 if [ -e "$bundle_root" ]; then
   mv "$bundle_root" "$backup_bundle"
@@ -145,7 +145,7 @@ printf '%s\n' \
   "  \"schema_version\": 2," \
   "  \"version\": \"$version\"," \
   "  \"build\": \"$build_number\"," \
-  "  \"bundle_identifier\": \"com.macro.desktop.gpui\"," \
+  "  \"bundle_identifier\": \"com.nickgardner.zacro\"," \
   "  \"url\": \"$archive_url\"," \
   "  \"sha256\": \"$archive_sha256\"," \
   "  \"size\": $archive_size," \

@@ -3,6 +3,8 @@ name = "macro_app"
 version = "0.1.0"
 edition = "2024"
 publish = false
+autobins = false
+default-run = "zacro"
 
 [lib]
 path = "src/macro_app.rs"
@@ -10,6 +12,10 @@ path = "src/macro_app.rs"
 [features]
 cargo-clippy = []
 visual-tests = ["gpui/test-support", "gpui_platform/test-support"]
+
+[[bin]]
+name = "zacro"
+path = "src/main.rs"
 
 [[bin]]
 name = "macro_visual_test_runner"

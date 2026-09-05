@@ -10,8 +10,8 @@ use std::{
 };
 use url::Url;
 
-pub const BUNDLE_IDENTIFIER: &str = "com.macro.desktop.gpui";
-const UPDATE_DIRECTORY: &str = ".macro-update";
+pub const BUNDLE_IDENTIFIER: &str = "com.nickgardner.zacro";
+const UPDATE_DIRECTORY: &str = ".zacro-update";
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct UpdateManifest {
@@ -144,7 +144,7 @@ pub async fn download_update(
     reqwest_client::runtime()
         .spawn(async move {
             let client = reqwest::Client::builder()
-                .user_agent("macro-gpui-updater/0.1")
+                .user_agent("zacro-updater/0.1")
                 .redirect_policy(reqwest::redirect::Policy::limited(5))
                 .build()?;
             let manifest_response = client.get(manifest_url.clone()).send().await?;
@@ -340,11 +340,11 @@ impl UpdateInstaller {
         let plist = fs::read_to_string(&plist_path)
             .with_context(|| format!("could not read {}", plist_path.display()))?;
         if !plist.contains(&format!("<string>{BUNDLE_IDENTIFIER}</string>")) {
-            bail!("staged update bundle identifier does not match Macro");
+            bail!("staged update bundle identifier does not match Zacro");
         }
-        let executable = staged.join("Contents/MacOS/Macro");
+        let executable = staged.join("Contents/MacOS/Zacro");
         if !executable.is_file() {
-            bail!("staged update has no Macro executable");
+            bail!("staged update has no Zacro executable");
         }
         if let BundleVerification::DeveloperId { team_identifier } = verification {
             verify_developer_id_bundle(&staged, team_identifier)?;
@@ -579,7 +579,7 @@ fn stage_macos_archive(installer: &UpdateInstaller) -> Result<()> {
         );
     }
 
-    let conventional = extraction.join("Macro.app");
+    let conventional = extraction.join("Zacro.app");
     let candidate = if conventional.is_dir() {
         conventional
     } else {
@@ -604,7 +604,7 @@ fn stage_macos_archive(installer: &UpdateInstaller) -> Result<()> {
 
 #[cfg(not(target_os = "macos"))]
 fn stage_macos_archive(_installer: &UpdateInstaller) -> Result<()> {
-    bail!("Macro .app archive staging is only available on macOS")
+    bail!("Zacro .app archive staging is only available on macOS")
 }
 
 fn remove_dir_if_present(path: &Path) -> Result<()> {
@@ -625,7 +625,7 @@ mod tests {
             version: Version::parse(version).unwrap(),
             build: "42".into(),
             bundle_identifier: BUNDLE_IDENTIFIER.into(),
-            url: "Macro-2.0.0-macos.zip".into(),
+            url: "Zacro-2.0.0-macos.zip".into(),
             sha256: format!("{:x}", Sha256::digest(archive)),
             size: archive.len() as u64,
             team_identifier: Some("ABCD123456".into()),
@@ -640,12 +640,12 @@ mod tests {
             format!("<plist><string>{BUNDLE_IDENTIFIER}</string></plist>"),
         )
         .unwrap();
-        let mut executable = fs::File::create(path.join("Contents/MacOS/Macro")).unwrap();
+        let mut executable = fs::File::create(path.join("Contents/MacOS/Zacro")).unwrap();
         executable.write_all(marker.as_bytes()).unwrap();
     }
 
     fn marker(path: &Path) -> String {
-        fs::read_to_string(path.join("Contents/MacOS/Macro")).unwrap()
+        fs::read_to_string(path.join("Contents/MacOS/Zacro")).unwrap()
     }
 
     #[test]
@@ -658,7 +658,7 @@ mod tests {
                 .archive_url(&Url::parse("https://updates.example/macos/manifest.json").unwrap())
                 .unwrap()
                 .as_str(),
-            "https://updates.example/macos/Macro-2.0.0-macos.zip"
+            "https://updates.example/macos/Zacro-2.0.0-macos.zip"
         );
 
         let mut wrong_app = manifest.clone();
@@ -694,7 +694,7 @@ mod tests {
     #[test]
     fn update_is_confirmed_only_after_a_healthy_launch() {
         let temp = tempfile::tempdir().unwrap();
-        let app = temp.path().join("Macro.app");
+        let app = temp.path().join("Zacro.app");
         make_bundle(&app, "old");
         let installer = UpdateInstaller::new(&app).unwrap();
         installer.prepare_state_directory().unwrap();
@@ -723,7 +723,7 @@ mod tests {
     #[test]
     fn second_unconfirmed_launch_rolls_back() {
         let temp = tempfile::tempdir().unwrap();
-        let app = temp.path().join("Macro.app");
+        let app = temp.path().join("Zacro.app");
         make_bundle(&app, "old");
         let installer = UpdateInstaller::new(&app).unwrap();
         installer.prepare_state_directory().unwrap();
@@ -750,7 +750,7 @@ mod tests {
     #[test]
     fn interrupted_swap_recovers_previous_bundle() {
         let temp = tempfile::tempdir().unwrap();
-        let app = temp.path().join("Macro.app");
+        let app = temp.path().join("Zacro.app");
         make_bundle(&app, "old");
         let installer = UpdateInstaller::new(&app).unwrap();
         installer.prepare_state_directory().unwrap();
@@ -774,9 +774,9 @@ mod tests {
     #[test]
     fn macos_zip_is_verified_and_staged_with_bundle_resources() {
         let temp = tempfile::tempdir().unwrap();
-        let installed = temp.path().join("Applications/Macro.app");
+        let installed = temp.path().join("Applications/Zacro.app");
         make_bundle(&installed, "old");
-        let source = temp.path().join("release/Macro.app");
+        let source = temp.path().join("release/Zacro.app");
         make_bundle(&source, "new");
         fs::write(source.join("Contents/Resources.txt"), "resource").unwrap();
         let installer = UpdateInstaller::new(&installed).unwrap();

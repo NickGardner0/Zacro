@@ -2,8 +2,8 @@ use macro_api::UserInfo;
 use serde::{Deserialize, Serialize};
 use std::path::Path;
 
-const DEVELOPMENT_CREDENTIALS_KEY: &str = "macro-gpui://session";
-const PACKAGED_CREDENTIALS_KEY: &str = "macro-gpui-app://session";
+const DEVELOPMENT_CREDENTIALS_KEY: &str = "zacro://session";
+const PACKAGED_CREDENTIALS_KEY: &str = "zacro-app://session";
 
 pub fn credentials_key() -> &'static str {
     credentials_key_for_executable(std::env::current_exe().ok().as_deref())
@@ -75,7 +75,7 @@ mod tests {
     fn packaged_and_development_executables_use_stable_distinct_namespaces() {
         assert_eq!(
             credentials_key_for_executable(Some(Path::new(
-                "/Applications/Macro.app/Contents/MacOS/Macro"
+                "/Applications/Zacro.app/Contents/MacOS/Zacro"
             ))),
             PACKAGED_CREDENTIALS_KEY
         );

@@ -1,4 +1,4 @@
-# Macro GPUI
+# Zacro — Macro GPUI rewrite
 
 Native GPUI client workbench for rebuilding Macro's desktop frontend with a
 Zed-inspired interaction model.
@@ -230,7 +230,8 @@ Zed-inspired interaction model.
   higher-contrast projection of the active Zed theme. Higher contrast stays
   inside Zed's semantic palette, replacing low-emphasis Macro text, icon, and
   border roles across every surface rather than introducing a second theme.
-- A macOS `.app` can be built with an ad-hoc signature and stable bundle identity:
+- A distinct `Zacro.app` can be built under `target/zacro` with an ad-hoc
+  signature, an isolated bundle identity, and the `zacro:` URL scheme:
 
   ```sh
   crates/macro-gpui/scripts/bundle-macos.sh release

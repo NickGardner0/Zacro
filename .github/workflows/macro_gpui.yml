@@ -127,18 +127,18 @@ jobs:
 
       - name: Verify bundle identity and signature
         run: |
-          test "$(defaults read "$PWD/target/macro-gpui/debug/Macro.app/Contents/Info" CFBundleIdentifier)" = "com.macro.desktop.gpui"
-          codesign --verify --deep --strict "$PWD/target/macro-gpui/debug/Macro.app"
-          test -f "$PWD/target/macro-gpui/debug/update-manifest.json"
+          test "$(defaults read "$PWD/target/zacro/debug/Zacro.app/Contents/Info" CFBundleIdentifier)" = "com.nickgardner.zacro"
+          codesign --verify --deep --strict "$PWD/target/zacro/debug/Zacro.app"
+          test -f "$PWD/target/zacro/debug/update-manifest.json"
 
       - name: Upload unsigned test bundle
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4.4.3
         with:
-          name: macro-gpui-macos-debug
+          name: zacro-macos-debug
           path: |
-            target/macro-gpui/debug/Macro.app
-            target/macro-gpui/debug/Macro-*-macos.zip
-            target/macro-gpui/debug/update-manifest.json
+            target/zacro/debug/Zacro.app
+            target/zacro/debug/Zacro-*-macos.zip
+            target/zacro/debug/update-manifest.json
           if-no-files-found: error
           retention-days: 7
 
@@ -216,26 +216,26 @@ jobs:
 
       - name: Verify signed release identity and update manifest
         run: |
-          bundle="$PWD/target/macro-gpui/release/Macro.app"
-          manifest="$PWD/target/macro-gpui/release/update-manifest.json"
+          bundle="$PWD/target/zacro/release/Zacro.app"
+          manifest="$PWD/target/zacro/release/update-manifest.json"
           codesign --verify --deep --strict --verbose=2 "$bundle"
           xcrun stapler validate "$bundle"
           spctl --assess --type execute --verbose=4 "$bundle"
-          test "$(defaults read "$bundle/Contents/Info" CFBundleIdentifier)" = "com.macro.desktop.gpui"
+          test "$(defaults read "$bundle/Contents/Info" CFBundleIdentifier)" = "com.nickgardner.zacro"
           test "$(jq -r .version "$manifest")" = "$MACRO_VERSION"
           test "$(jq -r .build "$manifest")" = "$MACRO_BUILD_NUMBER"
           test "$(jq -r .team_identifier "$manifest")" = "$MACRO_TEAM_IDENTIFIER"
-          test "$(jq -r .url "$manifest")" = "${MACRO_UPDATE_BASE_URL%/}/Macro-$MACRO_VERSION-macos.zip"
-          shasum -a 256 -c <(printf '%s  %s\n' "$(jq -r .sha256 "$manifest")" "target/macro-gpui/release/Macro-$MACRO_VERSION-macos.zip")
+          test "$(jq -r .url "$manifest")" = "${MACRO_UPDATE_BASE_URL%/}/Zacro-$MACRO_VERSION-macos.zip"
+          shasum -a 256 -c <(printf '%s  %s\n' "$(jq -r .sha256 "$manifest")" "target/zacro/release/Zacro-$MACRO_VERSION-macos.zip")
 
       - name: Upload signed notarized release
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4.4.3
         with:
-          name: Macro-${{ inputs.version }}-signed-notarized
+          name: Zacro-${{ inputs.version }}-signed-notarized
           path: |
-            target/macro-gpui/release/Macro.app
-            target/macro-gpui/release/Macro-${{ inputs.version }}-macos.zip
-            target/macro-gpui/release/update-manifest.json
+            target/zacro/release/Zacro.app
+            target/zacro/release/Zacro-${{ inputs.version }}-macos.zip
+            target/zacro/release/update-manifest.json
           if-no-files-found: error
           retention-days: 30
 
