@@ -279,7 +279,7 @@ members = [
     "tooling/perf",
     "tooling/xtask",
 ]
-default-members = ["crates/zed"]
+default-members = ["crates/macro-gpui/macro-app"]
 
 [workspace.package]
 publish = false

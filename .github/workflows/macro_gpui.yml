@@ -1,4 +1,4 @@
-name: Macro GPUI
+name: Zacro native CI
 
 on:
   pull_request:
@@ -6,20 +6,24 @@ on:
       - ".github/workflows/macro_gpui.yml"
       - "Cargo.lock"
       - "Cargo.toml"
-      - "crates/livekit_client/**"
-      - "crates/macro-gpui/**"
+      - "rust-toolchain.toml"
+      - ".cargo/**"
+      - "crates/**"
+      - "assets/**"
   push:
-    branches: [main]
+    branches: [main, codex/macro-gpui-rewrite]
     paths:
       - ".github/workflows/macro_gpui.yml"
       - "Cargo.lock"
       - "Cargo.toml"
-      - "crates/livekit_client/**"
-      - "crates/macro-gpui/**"
+      - "rust-toolchain.toml"
+      - ".cargo/**"
+      - "crates/**"
+      - "assets/**"
   workflow_dispatch:
     inputs:
       version:
-        description: Semantic version for a signed Macro release
+        description: Semantic version for a signed Zacro release
         required: true
         default: 0.1.0
         type: string
