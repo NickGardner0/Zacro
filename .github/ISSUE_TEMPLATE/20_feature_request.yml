@@ -1,0 +1,22 @@
+name: Feature request
+description: Propose an improvement to a Zacro workflow.
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What are you trying to do?
+      description: Describe the user problem and how you handle it today.
+    validations:
+      required: true
+  - type: textarea
+    id: outcome
+    attributes:
+      label: What would a useful result look like?
+      description: Suggest the smallest improvement that would solve the problem.
+    validations:
+      required: true
+  - type: textarea
+    id: reference
+    attributes:
+      label: Reference behavior
+      description: Link the relevant Macro workflow, source revision, or sanitized example, if applicable.
